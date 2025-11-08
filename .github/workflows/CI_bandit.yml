@@ -1,0 +1,43 @@
+name: Bandit CI
+
+on:
+  push:
+    branches: [trunk]
+  pull_request:
+    branches: [main]
+
+jobs:
+  bandit-scan:
+    name: Security Scan with Bandit
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python environment (3.12)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Step 3: Install Bandit
+      - name: Install Bandit
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit
+
+      # Step 4: Run Bandit security analysis
+      - name: Run Bandit analysis
+        run: |
+          mkdir -p test-results
+          bandit -r app/ --severity-level high -f txt -o test-results/bandit-report.txt
+
+      # Step 5: Upload Bandit report as artifact
+      - name: Upload Bandit report
+        if: always()  # se ejecuta incluso si se encuentran vulnerabilidades
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-security-report
+          path: test-results/
