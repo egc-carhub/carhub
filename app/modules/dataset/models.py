@@ -101,6 +101,16 @@ class DataSet(db.Model):
 
         return SizeService().get_human_readable_size(self.get_file_total_size())
 
+    def get_downloads_count(self):
+        # return the number of download records for this dataset
+        from app.modules.dataset.models import DSDownloadRecord
+
+        try:
+            return DSDownloadRecord.query.filter_by(dataset_id=self.id).count()
+        except Exception:
+            # If DB isn't available for some reason, fall back to 0
+            return 0
+
     def get_uvlhub_doi(self):
         from app.modules.dataset.services import DataSetService
 

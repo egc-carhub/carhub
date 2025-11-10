@@ -214,22 +214,16 @@ def download_dataset(dataset_id):
             mimetype="application/zip",
         )
 
-    # Check if the download record already exists for this cookie
-    existing_record = DSDownloadRecord.query.filter_by(
-        user_id=current_user.id if current_user.is_authenticated else None,
-        dataset_id=dataset_id,
-        download_cookie=user_cookie,
-    ).first()
-
-    if not existing_record:
-        # Record the download in your database
+    try:
         DSDownloadRecordService().create(
             user_id=current_user.id if current_user.is_authenticated else None,
             dataset_id=dataset_id,
             download_date=datetime.now(timezone.utc),
             download_cookie=user_cookie,
         )
-
+    except Exception:
+        # Don't block the download if DB write fails; swallow the error
+        logger.exception("Failed to record dataset download")
     return resp
 
 
