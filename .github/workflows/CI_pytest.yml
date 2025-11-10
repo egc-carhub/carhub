@@ -9,7 +9,7 @@ name: Pytest
 
 on:
   push:
-    branches: [main]
+    branches: [trunk]
   pull_request:
     branches: [main]
 
@@ -69,4 +69,14 @@ jobs:
 
       # Step 5: Run the pytest test suite (ignoring Selenium tests)
       - name: Run Tests
-        run: pytest app/modules/ --ignore-glob='*selenium*'
+        run: |
+          mkdir -p test-results
+          pytest app/modules/ --ignore-glob='*selenium*' --junitxml=test-results/results.xml
+
+      # Step 6: Save pytest results as GitHub artifact
+      - name: Save test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: ./test-results/
