@@ -161,22 +161,22 @@
             {% if dataset.ds_meta_data.dataset_doi %}
             <div class="card-body" style="padding-top: 0px">
 
-                <div id="dataset_doi_uvlhub" style="display: none">
-                    {{ dataset.get_uvlhub_doi() }}
+                <div id="dataset_doi_carhub" style="display: none">
+                    {{ dataset.get_carhub_doi() }}
                 </div>
 
-                <button type="button" class="btn doi_button btn-sm" onclick="copyText('dataset_doi_uvlhub')">
+                <button type="button" class="btn doi_button btn-sm" onclick="copyText('dataset_doi_carhub')">
                     <span class="button_doi_id">
                         <i data-feather="clipboard" class="center-button-icon" style="cursor: pointer"></i>
                         <b>DOI</b>
                     </span>
                     <span class="doi_text">
-                        {{ dataset.get_uvlhub_doi() }}
+                        {{ dataset.get_carhub_doi() }}
                     </span>
                 </button>
                 
-                <div id="dataset_doi_uvlhub" style="display: none">
-                    {{ dataset.get_uvlhub_doi() }}
+                <div id="dataset_doi_carhub" style="display: none">
+                    {{ dataset.get_carhub_doi() }}
                 </div>
                 
             </div>
@@ -191,7 +191,7 @@
                 <h3> Related publication </h3>
                 
                 David Romero-Organvidez, José A. Galindo, Chico Sundermann, Jose-Miguel Horcas, David Benavides,
-                <i>UVLHub: A feature model data repository using UVL and open science principles</i>,
+                <i>CARHub: A feature model data repository using CAR and open science principles</i>,
                 Journal of Systems and Software,
                 2024,
                 112150,
@@ -237,7 +237,7 @@
 
                 <div class="row">
                     <div class="col-12 d-flex justify-content-between align-items-center">
-                        <h4 style="margin-bottom: 0px">UVL models</h4>
+                        <h4 style="margin-bottom: 0px">CAR models</h4>
                         <h4 style="margin-bottom: 0px;"><span class="badge bg-dark">{{ dataset.get_files_count() }}</span></h4>
                     </div>
                 </div>
@@ -279,7 +279,7 @@
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="btnGroupDrop{{ file.id }}">
                                         <li>
-                                            <a class="dropdown-item" href="javascript:void(0);" onclick="checkUVL('{{ file.id }}')">Syntax check</a>
+                                            <a class="dropdown-item" href="javascript:void(0);" onclick="checkCAR('{{ file.id }}')">Syntax check</a>
                                         </li>
                                         <!--
                                         <li>
@@ -296,7 +296,7 @@
                                     <ul class="dropdown-menu" aria-labelledby="btnGroupDropExport{{ file.id }}">
                                         <li>
                                             <a class="dropdown-item" href="{{ url_for('hubfile.download_file', file_id=file.id) }}">
-                                                UVL
+                                                CAR
                                             </a>
                                             <a class="dropdown-item" href="{{ url_for('flamapy.to_glencoe', file_id=file.id) }}">
                                                 Glencoe
@@ -392,11 +392,11 @@
         document.getElementById("loading").style.display = "none";
     }
 
-    function checkUVL(file_id) {
+    function checkCAR(file_id) {
     const outputDiv = document.getElementById('check_' + file_id);
     outputDiv.innerHTML = ''; // Clear previous output
 
-    fetch(`/flamapy/check_uvl/${file_id}`)
+    fetch(`/flamapy/check_car/${file_id}`)
         .then(response => {
             return response.json().then(data => ({
                 status: response.status,
@@ -441,7 +441,7 @@
         const micropip = pyodide.pyimport("micropip");
         //await micropip.install("/assets/web_assembly/antlr4_python3_runtime-4.7.2-py3-none-any.whl");
         await micropip.install("antlr4-python3-runtime==4.13.1");
-        await micropip.install("uvlparser==2.0.1");
+        await micropip.install("carparser==2.0.1");
         //await micropip.install("afmparser==1.0.0");
 
         await pyodide.runPythonAsync(
@@ -463,12 +463,12 @@
             file_content = js.document.getElementById('fileContent').textContent 
             div = js.document.createElement("result")
 
-            with open("uvlfile.uvl", "w") as text_file:
+            with open("carfile.car", "w") as text_file:
                 print(file_content, file=text_file)
 
             from flamapy.interfaces.python.FLAMAFeatureModel import FLAMAFeatureModel
 
-            fm = FLAMAFeatureModel("uvlfile.uvl")
+            fm = FLAMAFeatureModel("carfile.car")
             result=fm.valid()
 
             div.innerHTML = "<div id='deleteme'>"+str(result)+"</div>"
