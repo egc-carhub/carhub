@@ -72,16 +72,13 @@ class CarFileChecker:
                 continue
             m = kv_regex.match(line)
             if not m:
-                # allow dash-list items or ignore
                 continue
             key_raw = m.group(1).strip()
             value_raw = m.group(2).strip()
             key_norm = key_raw.lower()
             canon = CANONICAL_KEYS.get(key_norm)
-            # store raw
             self.parsed_data["raw"][key_raw] = value_raw
             if canon:
-                # delegate parsing for numeric fields
                 if canon == "cc":
                     self.parsed_data[canon] = self._parse_int(value_raw, field="cc")
                 elif canon == "hp":
@@ -99,21 +96,14 @@ class CarFileChecker:
                 elif canon == "weight_kg":
                     self.parsed_data[canon] = self._parse_float(value_raw, field="weight_kg")
                 else:
-                    # text fields
                     self.parsed_data[canon] = value_raw
             else:
-                # unknown key: keep as note in raw
                 pass
 
     def _parse_int(self, s: str, field: str) -> Optional[int]:
-        # Accept textual values (ranges, approximations). Return int when the
-        # field clearly contains a single integer, otherwise return the
-        # original string so callers can keep the raw text and we don't emit
-        # an error.
         s_strip = (s or "").strip()
         if s_strip == "":
             return None
-        # if looks like a range or contains letters or tildes, keep raw
         if re.search(r"[-~–/]|[a-zA-Z]", s_strip):
             return s_strip
         cleaned = re.sub(r"[^0-9+-]", "", s_strip)
@@ -136,11 +126,9 @@ class CarFileChecker:
             return None
 
     def _parse_speed(self, s: str) -> Optional[float]:
-        # expect values like '250 km/h' or '250km/h' or '250'
         s_strip = (s or "").strip()
         if s_strip == "":
             return None
-        # if range/approx or text, keep raw string
         if re.search(r"[-~–/]|[a-zA-Z]", s_strip):
             return s_strip
         cleaned = re.sub(r"[^0-9+\-.]", "", s_strip)
@@ -152,7 +140,6 @@ class CarFileChecker:
             return s_strip
 
     def _parse_acceleration(self, s: str) -> Optional[float]:
-        # expect '4.1 sec' or '4.1s' or '4.1'
         s_strip = (s or "").strip()
         if s_strip == "":
             return None
@@ -167,13 +154,10 @@ class CarFileChecker:
             return s_strip
 
     def _parse_price(self, s: str) -> Optional[float]:
-        # remove currency symbols and commas
         s_strip = (s or "").strip()
         if s_strip == "":
             return None
-        # accept textual price (currency, ranges)
         if re.search(r"[-~–/]|[a-zA-Z]", s_strip):
-            # try to extract a single numeric value if present
             cleaned = re.sub(r"[,€$£\s]", "", s_strip)
             cleaned = re.sub(r"[^0-9+\-.]", "", cleaned)
             if cleaned == "":
@@ -192,7 +176,7 @@ class CarFileChecker:
             return s_strip
 
     def _validate(self):
-        # required fields
+        # required ields
         if not self.parsed_data.get("company"):
             self.errors.append("Falta 'Company' (marca).")
         if not self.parsed_data.get("model"):
@@ -200,10 +184,6 @@ class CarFileChecker:
         if not self.parsed_data.get("engine"):
             self.errors.append("Falta 'Engine'.")
 
-        # numeric validations
-        # Numeric validations only when parsed values are numbers. If the
-        # parsed field contains a textual value (ranges, approximations), we
-        # accept it and do not add a validation error.
         cc = self.parsed_data.get("cc")
         if isinstance(cc, int):
             if not (50 <= cc <= 10000):
@@ -272,6 +252,5 @@ def process_car_examples_dir(dir_path: str, output_json: Optional[str] = None) -
             with open(output_json, "w", encoding="utf-8") as out:
                 json.dump(results, out, ensure_ascii=False, indent=2)
         except Exception as e:
-            # writing JSON failed; include a small result entry
             results.append({"file": "<output>", "error": f"Failed writing output: {e}"})
     return results
