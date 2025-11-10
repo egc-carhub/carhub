@@ -36,14 +36,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 flake8-pyproject black isort
 
-      # Step 4: Run flake8 for PEP8 linting
+      # Step 4: Clean whitespace and ensure newline at EOF
+      - name: Clean whitespace and ensure newline
+        run: |
+          find app rosemary core -type f -name "*.py" -exec sed -i -e 's/[[:space:]]\+$//' -e '$a\' {} \;
+
+      # Step 5: Run flake8 for PEP8 linting
       - name: Lint with flake8
         run: flake8 app rosemary core
 
-      # Step 5: Verify code formatting with Black
+      # Step 6: Verify code formatting with Black
       - name: Check formatting with black
         run: black --check app rosemary core
 
-      # Step 6: Verify import ordering with isort
+      # Step 7: Verify import ordering with isort
       - name: Check import order with isort
         run: isort --check-only app rosemary core
