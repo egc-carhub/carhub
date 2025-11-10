@@ -1,0 +1,371 @@
+[
+  {
+    "file": "file1.car",
+    "valid": true,
+    "data": {
+      "company": "Toyota",
+      "model": "Celica",
+      "engine": "I4",
+      "cc": 1986,
+      "hp": 140,
+      "max_speed_kmh": 200.0,
+      "acceleration_sec": 8.5,
+      "price": 25000.0,
+      "seats": 5,
+      "year": null,
+      "battery_capacity": null,
+      "fuel": null,
+      "raw": {
+        "Company": "Toyota",
+        "Model": "Celica",
+        "Engine": "I4",
+        "CC": "1986",
+        "HP": "140",
+        "Max Speed": "200 km/h",
+        "Acceleration(0-100)": "8.5 sec",
+        "Price": "$25000",
+        "Seats": "5"
+      }
+    },
+    "errors": []
+  },
+  {
+    "file": "file10.car",
+    "valid": true,
+    "data": {
+      "company": "Aston Martin",
+      "model": "Valhalla",
+      "engine": "V8",
+      "cc": 3996,
+      "hp": 1000,
+      "max_speed_kmh": 362.0,
+      "acceleration_sec": 2.5,
+      "price": 1100000.0,
+      "seats": 2,
+      "year": null,
+      "battery_capacity": null,
+      "fuel": "Hybrid",
+      "raw": {
+        "Company": "Aston Martin",
+        "Model": "Valhalla",
+        "Engine": "V8",
+        "CC": "3996",
+        "HP": "1000",
+        "Max Speed": "362 km/h",
+        "Acceleration(0-100)": "2.5 sec",
+        "Price": "$1100000",
+        "Seats": "2",
+        "Fuel": "Hybrid"
+      }
+    },
+    "errors": []
+  },
+  {
+    "file": "file11.car",
+    "valid": true,
+    "data": {
+      "company": "Toyota",
+      "model": "GR Supra",
+      "engine": "I4",
+      "cc": 2998,
+      "hp": 382,
+      "max_speed_kmh": 250.0,
+      "acceleration_sec": 4.1,
+      "price": 53900.0,
+      "seats": 2,
+      "year": null,
+      "battery_capacity": null,
+      "fuel": "Petrol",
+      "raw": {
+        "Company": "Toyota",
+        "Model": "GR Supra",
+        "Engine": "I4",
+        "CC": "2998",
+        "HP": "382",
+        "Max Speed": "250 km/h",
+        "Acceleration(0-100)": "4.1 sec",
+        "Price": "$53900",
+        "Seats": "2",
+        "Fuel": "Petrol"
+      }
+    },
+    "errors": []
+  },
+  {
+    "file": "file12.car",
+    "valid": true,
+    "data": {
+      "company": "Bentley",
+      "model": "Continental GT Azure",
+      "engine": "V8",
+      "cc": 3996,
+      "hp": 550,
+      "max_speed_kmh": 318.0,
+      "acceleration_sec": 4.0,
+      "price": 311000.0,
+      "seats": 4,
+      "year": null,
+      "battery_capacity": null,
+      "fuel": null,
+      "raw": {
+        "Company": "Bentley",
+        "Model": "Continental GT Azure",
+        "Engine": "V8",
+        "CC": "3996",
+        "HP": "550",
+        "Max Speed": "318 km/h",
+        "Acceleration(0-100)": "4.0 sec",
+        "Price": "$311000",
+        "Seats": "4"
+      }
+    },
+    "errors": []
+  },
+  {
+    "file": "file2.car",
+    "valid": true,
+    "data": {
+      "company": "Mercedes",
+      "model": "Benz CLA 45 AMG",
+      "engine": "I4",
+      "cc": 1991,
+      "hp": 382,
+      "max_speed_kmh": 250.0,
+      "acceleration_sec": 4.1,
+      "price": 53000.0,
+      "seats": 5,
+      "year": null,
+      "battery_capacity": null,
+      "fuel": null,
+      "raw": {
+        "Company": "Mercedes",
+        "Model": "Benz CLA 45 AMG",
+        "Engine": "I4",
+        "CC": "1991",
+        "HP": "382",
+        "Max Speed": "250 km/h",
+        "Acceleration(0-100)": "4.1 sec",
+        "Price": "$53000",
+        "Seats": "5"
+      }
+    },
+    "errors": []
+  },
+  {
+    "file": "file3.car",
+    "valid": true,
+    "data": {
+      "company": "Peugeot",
+      "model": "2008",
+      "engine": "I4",
+      "cc": 1199,
+      "hp": 100,
+      "max_speed_kmh": 190.0,
+      "acceleration_sec": 9.0,
+      "price": 25000.0,
+      "seats": 5,
+      "year": null,
+      "battery_capacity": null,
+      "fuel": null,
+      "raw": {
+        "Company": "Peugeot",
+        "Model": "2008",
+        "Engine": "I4",
+        "CC": "1199",
+        "HP": "100",
+        "Max Speed": "190 km/h",
+        "Acceleration(0-100)": "9.0 sec",
+        "Price": "$25000",
+        "Seats": "5"
+      }
+    },
+    "errors": []
+  },
+  {
+    "file": "file4.car",
+    "valid": true,
+    "data": {
+      "company": "Peugeot",
+      "model": "205 GTI 1.9",
+      "engine": "I4",
+      "cc": 1905,
+      "hp": 130,
+      "max_speed_kmh": 210.0,
+      "acceleration_sec": 7.5,
+      "price": 12000.0,
+      "seats": 4,
+      "year": 1991,
+      "battery_capacity": null,
+      "fuel": null,
+      "raw": {
+        "Company": "Peugeot",
+        "Model": "205 GTI 1.9",
+        "Year": "1991",
+        "Engine": "I4",
+        "CC": "1905",
+        "HP": "130",
+        "Max Speed": "210 km/h",
+        "Acceleration(0-100)": "7.5 sec",
+        "Price": "$12000",
+        "Seats": "4"
+      }
+    },
+    "errors": []
+  },
+  {
+    "file": "file5.car",
+    "valid": true,
+    "data": {
+      "company": "Subaru",
+      "model": "Impreza WRC 555 (Carlos Sainz)",
+      "engine": "EJ20 2.0L Turbo Boxer",
+      "cc": 1994,
+      "hp": 300,
+      "max_speed_kmh": 230.0,
+      "acceleration_sec": 3.8,
+      "price": null,
+      "seats": 2,
+      "year": 1995,
+      "battery_capacity": null,
+      "fuel": null,
+      "raw": {
+        "Company": "Subaru",
+        "Model": "Impreza WRC 555 (Carlos Sainz)",
+        "Engine": "EJ20 2.0L Turbo Boxer",
+        "Year": "1995",
+        "CC": "1994",
+        "HP": "~300",
+        "Max Speed": "~230 km/h",
+        "Acceleration(0-100)": "~3.8 sec",
+        "Seats": "2"
+      }
+    },
+    "errors": []
+  },
+  {
+    "file": "file6.car",
+    "valid": false,
+    "data": {
+      "company": "Volkswagen",
+      "model": "Golf",
+      "engine": "1.5L Turbo I4/Electric",
+      "cc": 1498,
+      "hp": null,
+      "max_speed_kmh": 210.0,
+      "acceleration_sec": 8.5,
+      "price": 23000.0,
+      "seats": 5,
+      "year": null,
+      "battery_capacity": "40-50 kWh",
+      "fuel": null,
+      "raw": {
+        "Company": "Volkswagen",
+        "Model": "Golf",
+        "Engine": "1.5L Turbo I4/Electric",
+        "CC": "1498",
+        "Batterry capacity": "40-50 kWh",
+        "HP": "110-320",
+        "Max Speed": "210 km/h",
+        "Acceleration(0-100)": "8.5 sec",
+        "Price": "$23000",
+        "Seats": "5"
+      }
+    },
+    "errors": [
+      "No se pudo parsear entero para hp: '110-320'"
+    ]
+  },
+  {
+    "file": "file7.car",
+    "valid": false,
+    "data": {
+      "company": "Ferrari",
+      "model": "F2012",
+      "engine": "Ferrari 056 2.4L V8",
+      "cc": 2400,
+      "hp": 750,
+      "max_speed_kmh": null,
+      "acceleration_sec": null,
+      "price": null,
+      "seats": 1,
+      "year": 2012,
+      "battery_capacity": null,
+      "fuel": null,
+      "raw": {
+        "Company": "Ferrari",
+        "Model": "F2012",
+        "Year": "2012",
+        "Engine": "Ferrari 056 2.4L V8",
+        "CC": "2400",
+        "HP": "~750",
+        "Max Speed": "~330-360 km/h",
+        "Acceleration(0-100)": "~2.5-3.0 sec",
+        "Seats": "1"
+      }
+    },
+    "errors": [
+      "No se pudo parsear Max Speed: '~330-360 km/h'",
+      "No se pudo parsear Acceleration: '~2.5-3.0 sec'"
+    ]
+  },
+  {
+    "file": "file8.car",
+    "valid": true,
+    "data": {
+      "company": "Nissan",
+      "model": "Micra",
+      "engine": "1.0L Turbocharged I3",
+      "cc": 999,
+      "hp": 100,
+      "max_speed_kmh": 175.0,
+      "acceleration_sec": 10.8,
+      "price": 14500.0,
+      "seats": 5,
+      "year": null,
+      "battery_capacity": null,
+      "fuel": null,
+      "raw": {
+        "Company": "Nissan",
+        "Model": "Micra",
+        "Engine": "1.0L Turbocharged I3",
+        "CC": "999",
+        "HP": "100",
+        "Max Speed": "175 km/h",
+        "Acceleration(0-100)": "10.8 sec",
+        "Price": "$14500",
+        "Seats": "5"
+      }
+    },
+    "errors": []
+  },
+  {
+    "file": "file9.car",
+    "valid": true,
+    "data": {
+      "company": "Ford",
+      "model": "Fiesta",
+      "engine": "1.5L",
+      "cc": 1500,
+      "hp": 200,
+      "max_speed_kmh": 200.0,
+      "acceleration_sec": 7.0,
+      "price": 25000.0,
+      "seats": 5,
+      "year": null,
+      "battery_capacity": null,
+      "fuel": null,
+      "raw": {
+        "Company": "Ford",
+        "Model": "Fiesta",
+        "Engine": "1.5L",
+        "CC": "1500",
+        "HP": "200",
+        "Max Speed": "200 km/h",
+        "Acceleration(0-100)": "7.0 sec",
+        "Price": "$25000",
+        "Seats": "5"
+      }
+    },
+    "errors": []
+  }
+]
