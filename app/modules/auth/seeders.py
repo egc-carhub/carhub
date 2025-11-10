@@ -1,5 +1,6 @@
 from app.modules.auth.models import User
 from app.modules.profile.models import UserProfile
+from app.modules.auth.services.two_factor_service import TwoFactorService  # ✅ añadido
 from core.seeders.BaseSeeder import BaseSeeder
 
 
@@ -18,6 +19,12 @@ class AuthSeeder(BaseSeeder):
         # Inserted users with their assigned IDs are returned by `self.seed`.
         seeded_users = self.seed(users)
 
+        # ✅ Activar 2FA automáticamente para cada usuario creado
+        for user in seeded_users:
+            user.two_factor_secret = TwoFactorService.generate_secret()
+            user.two_factor_enabled = True
+        self.db.session.commit()
+
         # Create profiles for each user inserted.
         user_profiles = []
         names = [("John", "Doe"), ("Jane", "Doe")]
@@ -35,3 +42,5 @@ class AuthSeeder(BaseSeeder):
 
         # Seeding user profiles
         self.seed(user_profiles)
+
+        print("✅ Usuarios base creados con 2FA habilitado correctamente")

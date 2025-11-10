@@ -2,21 +2,19 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
 
 from core.configuration.configuration import get_app_version
 from core.managers.config_manager import ConfigManager
 from core.managers.error_handler_manager import ErrorHandlerManager
 from core.managers.logging_manager import LoggingManager
 from core.managers.module_manager import ModuleManager
+from core.blueprints.base_blueprint import BaseBlueprint
+from app.extensions import db, migrate
+
+auth_bp = BaseBlueprint("auth", __name__, template_folder="templates")
 
 # Load environment variables
 load_dotenv()
-
-# Create the instances
-db = SQLAlchemy()
-migrate = Migrate()
 
 
 def create_app(config_name="development"):
