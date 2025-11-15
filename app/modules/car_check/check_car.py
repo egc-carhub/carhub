@@ -241,12 +241,14 @@ def process_car_examples_dir(dir_path: str, output_json: Optional[str] = None) -
             results.append({"file": fname, "error": str(e)})
             continue
         checker = CarFileChecker(text)
-        results.append({
-            "file": fname,
-            "valid": checker.is_valid(),
-            "data": checker.get_parsed_data(),
-            "errors": checker.get_errors(),
-        })
+        results.append(
+            {
+                "file": fname,
+                "valid": checker.is_valid(),
+                "data": checker.get_parsed_data(),
+                "errors": checker.get_errors(),
+            }
+        )
     if output_json:
         try:
             with open(output_json, "w", encoding="utf-8") as out:

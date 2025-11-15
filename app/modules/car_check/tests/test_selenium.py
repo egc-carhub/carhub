@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 
-class TestCarcheck():
+class TestCarcheck:
 
     def setup_method(self):
         self.driver = webdriver.Firefox()
