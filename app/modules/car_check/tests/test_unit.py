@@ -1,7 +1,7 @@
 import json
-from importlib.machinery import SourceFileLoader
-from unittest.mock import patch, MagicMock, mock_open
 import os
+from importlib.machinery import SourceFileLoader
+from unittest.mock import MagicMock, mock_open, patch
 
 
 def load_checker():
