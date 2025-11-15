@@ -21,4 +21,3 @@ class TestCarcheck():
         self.driver.find_element(By.LINK_TEXT, "Syntax check").click()
         self.driver.find_element(By.CSS_SELECTOR, ".list-group-item:nth-child(2) .col-12 > .btn").click()
         self.driver.find_element(By.ID, "fileViewerModal").click()
-    
