@@ -1,9 +1,8 @@
-import re
 import json
-from datetime import datetime
-from typing import Dict, Any, List, Optional
 import os
-
+import re
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 CANONICAL_KEYS = {
     "make": "company",

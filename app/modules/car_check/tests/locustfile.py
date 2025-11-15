@@ -3,9 +3,10 @@ import random
 import sys
 
 from locust import HttpUser, between, task
-from core.environment.host import get_host_for_locust_testing
+
 from app import create_app
 from app.modules.hubfile.models import Hubfile
+from core.environment.host import get_host_for_locust_testing
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
 sys.path.insert(0, project_root)

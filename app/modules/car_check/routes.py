@@ -1,9 +1,10 @@
-from flask import jsonify
 import logging
-from app.modules.car_check import car_check_bp
-from app.modules.hubfile.services import HubfileService
 
+from flask import jsonify
+
+from app.modules.car_check import car_check_bp
 from app.modules.car_check.check_car import CarFileChecker
+from app.modules.hubfile.services import HubfileService
 
 logger = logging.getLogger(__name__)
 
