@@ -5,8 +5,8 @@ import os
 
 
 def load_checker():
-    mod_path = os.path.join(os.path.dirname(__file__), '..', 'check_car.py')
-    return SourceFileLoader('check_car', mod_path).load_module()
+    mod_path = os.path.join(os.path.dirname(__file__), "..", "check_car.py")
+    return SourceFileLoader("check_car", mod_path).load_module()
 
 
 def test_parse_simple_values():
@@ -25,15 +25,15 @@ def test_parse_simple_values():
     checker = mod.CarFileChecker(text)
     assert checker.is_valid()
     data = checker.get_parsed_data()
-    assert data['company'] == 'TestCo'
-    assert data['model'] == 'Speedster'
-    assert data['engine'] == 'I4'
-    assert isinstance(data['cc'], int) and data['cc'] == 1998
-    assert isinstance(data['hp'], int) and data['hp'] == 250
-    assert data['max_speed_kmh'] == '300 km/h'
-    assert data['acceleration_sec'] == '3.5 sec'
-    assert isinstance(data['price'], float) and data['price'] == 120000.0
-    assert isinstance(data['seats'], int) and data['seats'] == 2
+    assert data["company"] == "TestCo"
+    assert data["model"] == "Speedster"
+    assert data["engine"] == "I4"
+    assert isinstance(data["cc"], int) and data["cc"] == 1998
+    assert isinstance(data["hp"], int) and data["hp"] == 250
+    assert data["max_speed_kmh"] == "300 km/h"
+    assert data["acceleration_sec"] == "3.5 sec"
+    assert isinstance(data["price"], float) and data["price"] == 120000.0
+    assert isinstance(data["seats"], int) and data["seats"] == 2
 
 
 def test_parse_ranges_and_approx_values():
@@ -50,9 +50,9 @@ def test_parse_ranges_and_approx_values():
     checker = mod.CarFileChecker(text)
     assert checker.is_valid()
     data = checker.get_parsed_data()
-    assert data['hp'] == '110-320'
-    assert data['max_speed_kmh'] == '~330-360 km/h'
-    assert data['acceleration_sec'] == '~2.5-3.0 sec'
+    assert data["hp"] == "110-320"
+    assert data["max_speed_kmh"] == "~330-360 km/h"
+    assert data["acceleration_sec"] == "~2.5-3.0 sec"
 
 
 def test_missing_required_fields():
@@ -61,7 +61,7 @@ def test_missing_required_fields():
     checker = mod.CarFileChecker(text)
     assert not checker.is_valid()
     errs = checker.get_errors()
-    assert any('Company' in e or 'marca' in e for e in errs)
+    assert any("Company" in e or "marca" in e for e in errs)
 
 
 def test_battery_and_fuel_and_price_parsing(tmp_path):
@@ -77,22 +77,22 @@ def test_battery_and_fuel_and_price_parsing(tmp_path):
     checker = mod.CarFileChecker(text)
     assert checker.is_valid()
     data = checker.get_parsed_data()
-    assert data['battery_capacity'] == '40-50 kWh'
-    assert data['fuel'] == 'Electric'
-    assert data['price'] == 35000.0
+    assert data["battery_capacity"] == "40-50 kWh"
+    assert data["fuel"] == "Electric"
+    assert data["price"] == 35000.0
 
 
 def test_process_car_examples_dir_and_output(tmp_path):
     mod = load_checker()
-    d = tmp_path / 'examples'
+    d = tmp_path / "examples"
     d.mkdir()
-    (d / 'a.car').write_text('Company: A\nModel: A1\nEngine: I4\nCC: 1000\n')
-    (d / 'b.car').write_text('Company: B\nModel: B1\nEngine: I4\nHP: 150\n')
-    out_json = tmp_path / 'out.json'
+    (d / "a.car").write_text("Company: A\nModel: A1\nEngine: I4\nCC: 1000\n")
+    (d / "b.car").write_text("Company: B\nModel: B1\nEngine: I4\nHP: 150\n")
+    out_json = tmp_path / "out.json"
     results = mod.process_car_examples_dir(str(d), output_json=str(out_json))
     assert len(results) == 2
     assert out_json.exists()
-    loaded = json.loads(out_json.read_text(encoding='utf-8'))
+    loaded = json.loads(out_json.read_text(encoding="utf-8"))
     assert isinstance(loaded, list) and len(loaded) == 2
 
 
@@ -101,7 +101,7 @@ def test_empty_file():
     checker = mod.CarFileChecker("")
     assert not checker.is_valid()
     errs = checker.get_errors()
-    assert any('vacío' in e.lower() or 'empty' in e.lower() or 'archivo' in e.lower() for e in errs)
+    assert any("vacío" in e.lower() or "empty" in e.lower() or "archivo" in e.lower() for e in errs)
 
 
 @patch("app.modules.car_check.routes.HubfileService")
@@ -110,20 +110,14 @@ def test_check_car_valid_file(mock_hubfile_service, test_client):
     mock_hubfile.get_path.return_value = "dummy/path/car.car"
     mock_hubfile_service.return_value.get_by_id.return_value = mock_hubfile
 
-    valid_content = (
-        "Company: TestCo\n"
-        "Model: Speedster\n"
-        "Engine: I4\n"
-        "CC: 1998\n"
-        "HP: 250\n"
-    )
+    valid_content = "Company: TestCo\n" "Model: Speedster\n" "Engine: I4\n" "CC: 1998\n" "HP: 250\n"
 
     m_open = mock_open(read_data=valid_content)
     with patch("builtins.open", m_open):
         response = test_client.get("/car_check/1")
 
     assert response.status_code == 200
-    data = response.get_json() if hasattr(response, 'get_json') else json.loads(response.data)
+    data = response.get_json() if hasattr(response, "get_json") else json.loads(response.data)
     assert data["valid"] is True
     assert data["parsed_data"]["company"] == "TestCo"
 
@@ -141,7 +135,7 @@ def test_check_car_invalid_file(mock_hubfile_service, test_client):
         response = test_client.get("/car_check/1")
 
     assert response.status_code == 400
-    data = response.get_json() if hasattr(response, 'get_json') else json.loads(response.data)
+    data = response.get_json() if hasattr(response, "get_json") else json.loads(response.data)
     assert data["valid"] is False
     assert isinstance(data.get("errors"), list) and len(data["errors"]) >= 1
 
@@ -151,5 +145,5 @@ def test_check_car_file_not_found(mock_hubfile_service, test_client):
     mock_hubfile_service.return_value.get_by_id.return_value = None
     response = test_client.get("/car_check/999")
     assert response.status_code == 404
-    data = response.get_json() if hasattr(response, 'get_json') else json.loads(response.data)
+    data = response.get_json() if hasattr(response, "get_json") else json.loads(response.data)
     assert data.get("error") == "Hubfile no encontrado"
