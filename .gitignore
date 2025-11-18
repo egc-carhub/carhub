@@ -54,3 +54,16 @@ ubuntu-bionic-18.04-cloudimg-console.log
 # Custom ignores
 # ==========================
 .moduleignore
+
+# ==========================
+# Database & seeding
+# ==========================
+instance/
+*.db
+*.sqlite3
+*.sqlite
+
+# ==========================
+# Two-Factor Authentication
+# ==========================
+# qrs_full/
