@@ -1,7 +1,8 @@
+import base64
+import io
+
 import pyotp
 import qrcode
-import io
-import base64
 
 
 class TwoFactorService:
@@ -16,9 +17,7 @@ class TwoFactorService:
         Genera el código QR que el usuario escaneará en Google Authenticator.
         Devuelve el QR como una cadena base64 (para incrustar en HTML).
         """
-        uri = pyotp.totp.TOTP(secret).provisioning_uri(
-            name=email, issuer_name="UVLHub"
-        )
+        uri = pyotp.totp.TOTP(secret).provisioning_uri(name=email, issuer_name="UVLHub")
         qr_img = qrcode.make(uri)
         buf = io.BytesIO()
         qr_img.save(buf, format="PNG")

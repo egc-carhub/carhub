@@ -3,13 +3,13 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 
+from app.extensions import db, migrate
+from core.blueprints.base_blueprint import BaseBlueprint
 from core.configuration.configuration import get_app_version
 from core.managers.config_manager import ConfigManager
 from core.managers.error_handler_manager import ErrorHandlerManager
 from core.managers.logging_manager import LoggingManager
 from core.managers.module_manager import ModuleManager
-from core.blueprints.base_blueprint import BaseBlueprint
-from app.extensions import db, migrate
 
 auth_bp = BaseBlueprint("auth", __name__, template_folder="templates")
 

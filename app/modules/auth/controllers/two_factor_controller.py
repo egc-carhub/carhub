@@ -1,8 +1,9 @@
 from flask import jsonify, request
 from flask_login import current_user, login_required
-from app.modules.auth.services.two_factor_service import TwoFactorService
-from app.modules.auth import auth_bp
+
 from app import db  # usa la instancia global, no app.extensions
+from app.modules.auth import auth_bp
+from app.modules.auth.services.two_factor_service import TwoFactorService
 
 
 @auth_bp.route("/enable-2fa", methods=["POST"])

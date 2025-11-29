@@ -1,10 +1,10 @@
-from locust import HttpUser, TaskSet, task
-
 import os
+
+import pyotp
+from locust import HttpUser, TaskSet, task
 
 from core.environment.host import get_host_for_locust_testing
 from core.locust.common import fake, get_csrf_token
-import pyotp
 
 
 class SignupBehavior(TaskSet):
@@ -55,7 +55,7 @@ class LoginBehavior(TaskSet):
         # If the app redirected to a 2FA verification page, submit a TOTP code.
         # Prefer a fixed TEST_2FA_SECRET in env for deterministic CI runs; if not
         # present we skip submission because the code rotates and may fail.
-        if "id=\"code\"" in response.text or "Two-Factor Authentication" in response.text:
+        if 'id="code"' in response.text or "Two-Factor Authentication" in response.text:
             secret = os.getenv("TEST_2FA_SECRET")
             if secret:
                 try:

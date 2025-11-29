@@ -1,16 +1,15 @@
-import pytest
-from flask import url_for
-
-from app.modules.auth.repositories import UserRepository
-from app.modules.auth.services import AuthenticationService
-from app.modules.profile.repositories import UserProfileRepository
 import base64
 
 import pyotp
+import pytest
+from flask import url_for
 
-from app.modules.auth.services.two_factor_service import TwoFactorService
-from app.modules.auth.models import User
 from app.extensions import db
+from app.modules.auth.models import User
+from app.modules.auth.repositories import UserRepository
+from app.modules.auth.services import AuthenticationService
+from app.modules.auth.services.two_factor_service import TwoFactorService
+from app.modules.profile.repositories import UserProfileRepository
 
 
 @pytest.fixture(scope="module")

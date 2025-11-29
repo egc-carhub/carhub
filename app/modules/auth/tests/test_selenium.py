@@ -1,15 +1,17 @@
+import os
 import time
+
+import pyotp
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-import os
-import pyotp
+
+from core.environment.host import get_host_for_selenium_testing
+from core.selenium.common import close_driver, initialize_driver
 
 # Note: we deliberately avoid querying the app DB from the test runner to
 # prevent cross-environment issues. Use TEST_2FA_SECRET to make tests
 # deterministic in CI.
 
-from core.environment.host import get_host_for_selenium_testing
-from core.selenium.common import close_driver, initialize_driver
 
 
 def test_login_and_check_element():
