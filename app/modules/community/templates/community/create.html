@@ -1,0 +1,29 @@
+{%extends "base_template.html"%}
+
+{%block title%}Create Community{%endblock%}
+
+{%block content%}
+
+<h1 class="h3 mb-3">Create a new community</h1>
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{form.name.label(class="form-label")}}
+        {{form.name(size=32)}}
+        {% if form.name.errors %}
+            <span style="color: red;">{{ form.name.errors[0] }}</span><br>
+        {% endif %}
+    </div>
+    <div>
+        {{form.description.label(class="form-label")}}
+        {{form.description(rows=4, cols=40)}}
+        {% if form.description.errors %}
+            <span style="color: red;">{{ form.description.errors[0] }}</span><br>
+        {% endif %}
+    </div>
+    <div>
+        {{form.submit}}
+    </div>
+</form>
+{%endblock%}
+
