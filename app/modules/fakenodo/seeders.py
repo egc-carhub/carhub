@@ -10,17 +10,17 @@ def seed_depositions():
             Deposition(
                 dep_metadata={"title": "Sample Dataset 1", "description": "Description for dataset 1"},
                 status="draft",
-                doi=None
+                doi=None,
             ),
             Deposition(
                 dep_metadata={"title": "Sample Dataset 2", "description": "Description for dataset 2"},
                 status="published",
-                doi="fakenodo.doi.2"
+                doi="fakenodo.doi.2",
             ),
             Deposition(
                 dep_metadata={"title": "Sample Dataset 3", "description": "Description for dataset 3"},
                 status="draft",
-                doi="fakenodo.doi.3"
+                doi="fakenodo.doi.3",
             ),
         ]
         db.session.bulk_save_objects(depositions)

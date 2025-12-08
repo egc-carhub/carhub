@@ -1,14 +1,12 @@
-from flask import redirect, render_template, request, url_for, jsonify, session
-from flask_login import current_user, login_user, logout_user, login_required
+from flask import jsonify, redirect, render_template, request, session, url_for
+from flask_login import current_user, login_required, login_user, logout_user
 
+from app.extensions import db
 from app.modules.auth import auth_bp
 from app.modules.auth.forms import LoginForm, SignupForm
+from app.modules.auth.models import UserSession
 from app.modules.auth.services import AuthenticationService
 from app.modules.profile.services import UserProfileService
-
-from app.modules.auth.models import UserSession
-from app.extensions import db
-
 
 authentication_service = AuthenticationService()
 user_profile_service = UserProfileService()
@@ -57,6 +55,7 @@ def logout():
     logout_user()
     return redirect(url_for("public.index"))
 
+
 @auth_bp.route("/sessions", methods=["GET"])
 @login_required
 def list_sessions():
@@ -74,7 +73,7 @@ def list_sessions():
             "user_agent": s.user_agent,
             "created_at": s.created_at.isoformat(),
             "last_activity": s.last_activity.isoformat(),
-            "is_current": s.session_token == current_session_id
+            "is_current": s.session_token == current_session_id,
         }
         for s in sessions
     ]
@@ -83,6 +82,7 @@ def list_sessions():
     print("DATA SENT TO FRONTEND:", data)
 
     return jsonify(data)
+
 
 @auth_bp.route("/sessions/<int:session_id>", methods=["DELETE"])
 @login_required
@@ -101,24 +101,25 @@ def delete_session(session_id):
 
     return jsonify({"message": "Session closed"})
 
+
 @auth_bp.route("/sessions", methods=["DELETE"])
 @login_required
 def delete_other_sessions():
     current_id = session.get("_id")
 
-    UserSession.query.filter(
-        UserSession.user_id == current_user.id,
-        UserSession.session_token != current_id
-    ).delete(synchronize_session=False)
+    UserSession.query.filter(UserSession.user_id == current_user.id, UserSession.session_token != current_id).delete(
+        synchronize_session=False
+    )
 
     db.session.commit()
     return jsonify({"message": "Other sessions closed"})
 
+
 @auth_bp.route("/sessions/test", methods=["GET"])
 @login_required
 def create_test_session():
-    from datetime import datetime
     import uuid
+    from datetime import datetime
 
     # Crear sesión de prueba
     test_session = UserSession(
@@ -127,12 +128,9 @@ def create_test_session():
         user_agent="TestAgent",
         session_token=str(uuid.uuid4()),
         created_at=datetime.utcnow(),
-        last_activity=datetime.utcnow()
+        last_activity=datetime.utcnow(),
     )
     db.session.add(test_session)
     db.session.commit()
 
-    return jsonify({
-        "message": "Test session created",
-        "session_id": test_session.id
-    })
+    return jsonify({"message": "Test session created", "session_id": test_session.id})

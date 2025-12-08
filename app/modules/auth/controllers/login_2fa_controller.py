@@ -1,12 +1,16 @@
-from flask import jsonify, redirect, render_template, request, url_for, session as flask_session
+from datetime import datetime
+from uuid import uuid4
+
+from flask import jsonify, redirect, render_template, request
+from flask import session as flask_session
+from flask import url_for
 from flask_login import current_user, login_user
+
+from app import db
 from app.modules.auth import auth_bp
 from app.modules.auth.forms import LoginForm
 from app.modules.auth.models import User, UserSession
 from app.modules.auth.services.two_factor_service import TwoFactorService
-from datetime import datetime
-from uuid import uuid4
-from app import db
 
 
 # -----------------------------------------------------------------------------
@@ -36,13 +40,17 @@ def login():
 
     if not email or not password:
         msg = "Email y contraseña requeridos"
-        return (jsonify({"error": msg}), 400) if is_json else render_template("auth/login_form.html", form=form, error=msg)
+        return (
+            (jsonify({"error": msg}), 400) if is_json else render_template("auth/login_form.html", form=form, error=msg)
+        )
 
     user = User.query.filter_by(email=email).first()
 
     if not user or not user.check_password(password):
         msg = "Credenciales incorrectas"
-        return (jsonify({"error": msg}), 401) if is_json else render_template("auth/login_form.html", form=form, error=msg)
+        return (
+            (jsonify({"error": msg}), 401) if is_json else render_template("auth/login_form.html", form=form, error=msg)
+        )
 
     if not user.two_factor_enabled:
         login_user(user)
@@ -97,7 +105,7 @@ def verify_login_2fa():
         user_agent=request.headers.get("User-Agent"),
         session_token=session_token,
         created_at=datetime.utcnow(),
-        last_activity=datetime.utcnow()
+        last_activity=datetime.utcnow(),
     )
     db.session.add(user_session)
     db.session.commit()

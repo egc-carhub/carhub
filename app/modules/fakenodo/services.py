@@ -2,16 +2,15 @@ import hashlib
 import logging
 import os
 
-
 from dotenv import load_dotenv
 from flask_login import current_user
+
 from app.modules.dataset.models import DataSet, DSMetaData
 from app.modules.fakenodo.models import Deposition
 from app.modules.fakenodo.repositories import DepositionRepo
 from app.modules.featuremodel.models import FeatureModel
 from core.configuration.configuration import uploads_folder_name
 from core.services.BaseService import BaseService
-
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -35,9 +34,7 @@ class FakenodoService(BaseService):
             "title": ds_meta_data.title,
             "upload_type": "dataset" if ds_meta_data.publication_type.value == "none" else "publication",
             "publication_type": (
-                ds_meta_data.publication_type.value
-                if ds_meta_data.publication_type.value != "none"
-                else None
+                ds_meta_data.publication_type.value if ds_meta_data.publication_type.value != "none" else None
             ),
             "description": ds_meta_data.description,
             "creators": [
@@ -48,9 +45,7 @@ class FakenodoService(BaseService):
                 }
                 for author in ds_meta_data.authors
             ],
-            "keywords": (
-                ["uvlhub"] if not ds_meta_data.tags else ds_meta_data.tags.split(", ") + ["uvlhub"]
-            ),
+            "keywords": (["uvlhub"] if not ds_meta_data.tags else ds_meta_data.tags.split(", ") + ["uvlhub"]),
             "access_right": "open",
             "license": "CC-BY-4.0",
         }
@@ -61,7 +56,7 @@ class FakenodoService(BaseService):
             return {
                 "id": deposition.id,
                 "metadata": metadataJSON,
-                "message": "Deposition succesfully created in Fakenodo"
+                "message": "Deposition succesfully created in Fakenodo",
             }
         except Exception as error400:
             raise Exception(f"Failed to create deposition in Fakenodo with error: {str(error400)}")
@@ -84,7 +79,7 @@ class FakenodoService(BaseService):
             "file": uvl_filename,
             "fileSize": os.path.getsize(file_path),
             "checksum": checksum(file_path),
-            "message": f"File Uploaded to deposition with id {deposition_id}"
+            "message": f"File Uploaded to deposition with id {deposition_id}",
         }
         return request
 
@@ -107,7 +102,7 @@ class FakenodoService(BaseService):
                 "id": deposition_id,
                 "status": "published",
                 "conceptdoi": f"fakenodo.doi.{deposition_id}",
-                "message": "Deposition published successfully in fakenodo."
+                "message": "Deposition published successfully in fakenodo.",
             }
             return response
         except Exception as error:
@@ -129,7 +124,7 @@ class FakenodoService(BaseService):
             "doi": deposition.doi,
             "metadata": deposition.dep_metadata,
             "status": deposition.status,
-            "message": "Deposition succesfully get from Fakenodo."
+            "message": "Deposition succesfully get from Fakenodo.",
         }
         return response
 
