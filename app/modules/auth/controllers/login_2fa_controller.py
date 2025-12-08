@@ -1,10 +1,12 @@
-from flask import jsonify, redirect, render_template, request, session, url_for
+from flask import jsonify, redirect, render_template, request, url_for, session as flask_session
 from flask_login import current_user, login_user
-
 from app.modules.auth import auth_bp
 from app.modules.auth.forms import LoginForm
-from app.modules.auth.models import User
+from app.modules.auth.models import User, UserSession
 from app.modules.auth.services.two_factor_service import TwoFactorService
+from datetime import datetime
+from uuid import uuid4
+from app import db
 
 
 # -----------------------------------------------------------------------------
@@ -19,11 +21,9 @@ def login():
 
     form = LoginForm()
 
-    # --- 1️⃣ GET: mostrar formulario ---
     if request.method == "GET":
         return render_template("auth/login_form.html", form=form)
 
-    # --- 2️⃣ POST: procesar formulario o JSON ---
     if request.content_type and "application/json" in request.content_type:
         data = request.get_json(silent=True) or {}
         email = data.get("email")
@@ -36,24 +36,21 @@ def login():
 
     if not email or not password:
         msg = "Email y contraseña requeridos"
-        return (
-            (jsonify({"error": msg}), 400) if is_json else render_template("auth/login_form.html", form=form, error=msg)
-        )
+        return (jsonify({"error": msg}), 400) if is_json else render_template("auth/login_form.html", form=form, error=msg)
 
     user = User.query.filter_by(email=email).first()
 
     if not user or not user.check_password(password):
         msg = "Credenciales incorrectas"
-        return (
-            (jsonify({"error": msg}), 401) if is_json else render_template("auth/login_form.html", form=form, error=msg)
-        )
+        return (jsonify({"error": msg}), 401) if is_json else render_template("auth/login_form.html", form=form, error=msg)
 
     if not user.two_factor_enabled:
         login_user(user)
         msg = "Inicio de sesión exitoso sin 2FA"
         return (jsonify({"message": msg}), 200) if is_json else redirect(url_for("public.index"))
 
-    session["pending_2fa_user"] = user.id
+    # Guardar usuario pendiente de 2FA
+    flask_session["pending_2fa_user"] = user.id
 
     if is_json:
         return jsonify({"message": "Código 2FA requerido"}), 202
@@ -79,7 +76,7 @@ def verify_login_2fa():
         code = request.form.get("code")
         is_json = False
 
-    user_id = session.get("pending_2fa_user")
+    user_id = flask_session.get("pending_2fa_user")
 
     if not user_id:
         msg = "No hay login pendiente de verificación"
@@ -91,7 +88,23 @@ def verify_login_2fa():
         return (jsonify({"error": msg}), 400) if is_json else render_template("auth/verify_2fa.html", error=msg)
 
     login_user(user)
-    session.pop("pending_2fa_user", None)
+
+    # Crear sesión en DB
+    session_token = str(uuid4())
+    user_session = UserSession(
+        user_id=user.id,
+        ip_address=request.remote_addr,
+        user_agent=request.headers.get("User-Agent"),
+        session_token=session_token,
+        created_at=datetime.utcnow(),
+        last_activity=datetime.utcnow()
+    )
+    db.session.add(user_session)
+    db.session.commit()
+
+    # Guardar token en flask_session
+    flask_session["_id"] = session_token
+    flask_session.pop("pending_2fa_user", None)
 
     msg = "Inicio de sesión completado con 2FA"
     return (jsonify({"message": msg}), 200) if is_json else redirect(url_for("public.index"))

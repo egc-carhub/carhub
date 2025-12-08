@@ -5,3 +5,4 @@ auth_bp = BaseBlueprint("auth", __name__, template_folder="templates")
 
 # Importar controladores SOLO una vez
 from app.modules.auth.controllers import *  # noqa: E402,F401,F403
+from app.modules.auth.routes import *       
