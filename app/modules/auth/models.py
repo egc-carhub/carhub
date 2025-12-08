@@ -39,6 +39,7 @@ class User(db.Model, UserMixin):
 
         return AuthenticationService().temp_folder_by_user(self)
 
+
 class UserSession(db.Model):
     __tablename__ = "user_sessions"
 
@@ -54,4 +55,3 @@ class UserSession(db.Model):
 
     # Relationship
     user = db.relationship("User", backref="sessions")
-

@@ -13,7 +13,6 @@ from core.selenium.common import close_driver, initialize_driver
 # deterministic in CI.
 
 
-
 def test_login_and_check_element():
     """Login using the app helpers and assert a known element is present on success."""
     driver = initialize_driver()
