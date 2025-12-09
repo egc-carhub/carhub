@@ -6,6 +6,7 @@ venv/
 vagrant_venv/
 rosemary.egg-info/
 build/
+node_modules/
 __pycache__/
 *.pyc
 *.pyo
