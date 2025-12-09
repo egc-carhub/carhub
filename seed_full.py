@@ -32,27 +32,33 @@ with app.app_context():
     qr_folder = os.path.join(os.getcwd(), "qrs_full")
     os.makedirs(qr_folder, exist_ok=True)
 
+    # Activar 2FA SOLO para los usuarios con secretos fijos (FIXED_SECRETS)
     for user in users:
-        # Usa el secreto fijo si el usuario está en la lista
-        secret = FIXED_SECRETS.get(user.email, TwoFactorService.generate_secret())
-        user.two_factor_secret = secret
-        user.two_factor_enabled = True
+        if user.email in FIXED_SECRETS:
+            # Usa el secreto fijo
+            secret = FIXED_SECRETS[user.email]
+            user.two_factor_secret = secret
+            user.two_factor_enabled = True
 
-        # Generar el QR correspondiente
-        qr_data = TwoFactorService.generate_qr_code(user.email, user.two_factor_secret)
-        qr_base64 = qr_data.split(",")[1]
-        img_bytes = base64.b64decode(qr_base64)
+            # Generar el QR correspondiente
+            qr_data = TwoFactorService.generate_qr_code(user.email, user.two_factor_secret)
+            qr_base64 = qr_data.split(",")[1]
+            img_bytes = base64.b64decode(qr_base64)
 
-        filename = f"qr_{user.email.replace('@', '_at_')}.png"
-        filepath = os.path.join(qr_folder, filename)
+            filename = f"qr_{user.email.replace('@', '_at_')}.png"
+            filepath = os.path.join(qr_folder, filename)
 
-        with open(filepath, "wb") as f:
-            f.write(img_bytes)
+            with open(filepath, "wb") as f:
+                f.write(img_bytes)
 
-        print(f"--- {user.email} ---")
-        print(f"URI: otpauth://totp/UVLHub:{user.email}?secret={user.two_factor_secret}&issuer=UVLHub")
-        print(f"🔑 Secreto: {user.two_factor_secret}")
-        print(f"🖼️ QR guardado en: {filepath}\n")
+            print(f"--- {user.email} ---")
+            print(f"URI: otpauth://totp/UVLHub:{user.email}?secret={user.two_factor_secret}&issuer=UVLHub")
+            print(f"🔑 Secreto: {user.two_factor_secret}")
+            print(f"🖼️ QR guardado en: {filepath}\n")
+        else:
+            # Ensure other users don't get 2FA enabled by this script
+            user.two_factor_secret = None
+            user.two_factor_enabled = False
 
     db.session.commit()
     print("✅ Base de datos restaurada con datasets y usuarios 2FA activados correctamente (secretos fijos).")
