@@ -16,6 +16,8 @@ class AuthSeeder(BaseSeeder):
         users = [
             User(email="user1@example.com", password="1234"),
             User(email="user2@example.com", password="1234"),
+            # Add a third user without 2FA by default
+            User(email="user3@example.com", password="1234"),
         ]
 
         # Inserted users with their assigned IDs are returned by `self.seed`.
@@ -23,22 +25,28 @@ class AuthSeeder(BaseSeeder):
         qr_folder = os.path.join(os.getcwd(), "qrs_full")
         os.makedirs(qr_folder, exist_ok=True)
 
-        # ✅ Activar 2FA automáticamente para cada usuario creado
+        # ✅ Activar 2FA automáticamente SOLO para usuarios listados (user1 & user2)
+        users_with_2fa = {"user1@example.com", "user2@example.com"}
         for user in seeded_users:
-            user.two_factor_secret = TwoFactorService.generate_secret(user.email)
-            user.two_factor_enabled = True
-            qr_data = TwoFactorService.generate_qr_code(user.email, user.two_factor_secret)
-            qr_base64 = qr_data.split(",")[1]
-            img_bytes = base64.b64decode(qr_base64)
-            filename = f"qr_{user.email.replace('@', '_at_')}.png"
-            filepath = os.path.join(qr_folder, filename)
-            with open(filepath, "wb") as f:
-                f.write(img_bytes)
+            if user.email in users_with_2fa:
+                user.two_factor_secret = TwoFactorService.generate_secret(user.email)
+                user.two_factor_enabled = True
+                qr_data = TwoFactorService.generate_qr_code(user.email, user.two_factor_secret)
+                qr_base64 = qr_data.split(",")[1]
+                img_bytes = base64.b64decode(qr_base64)
+                filename = f"qr_{user.email.replace('@', '_at_')}.png"
+                filepath = os.path.join(qr_folder, filename)
+                with open(filepath, "wb") as f:
+                    f.write(img_bytes)
+            else:
+                # Ensure 2FA disabled for other seeded users
+                user.two_factor_secret = None
+                user.two_factor_enabled = False
         self.db.session.commit()
 
         # Create profiles for each user inserted.
         user_profiles = []
-        names = [("John", "Doe"), ("Jane", "Doe")]
+        names = [("John", "Doe"), ("Jane", "Doe"), ("Alice", "Smith")]
 
         for user, name in zip(seeded_users, names):
             profile_data = {
