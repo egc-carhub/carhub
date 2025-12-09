@@ -1,5 +1,6 @@
 import base64
 import io
+import random
 
 import pyotp
 import qrcode
@@ -7,9 +8,12 @@ import qrcode
 
 class TwoFactorService:
     @staticmethod
-    def generate_secret():
+    def generate_secret(seed=None):
         """Genera un secreto TOTP aleatorio para un usuario nuevo."""
-        return pyotp.random_base32()
+        rng = random.Random(seed)            # RNG controlado
+        random_bytes = bytes(rng.getrandbits(8) for _ in range(20))  # tamaño típico para TOTP
+        secret = base64.b32encode(random_bytes).decode().replace("=", "")
+        return secret
 
     @staticmethod
     def generate_qr_code(email, secret):
