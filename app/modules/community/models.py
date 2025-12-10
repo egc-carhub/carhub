@@ -18,6 +18,11 @@ class Community(db.Model):
         secondary=community_members,
         back_populates='communities'
     )
+    datasets = db.relationship(
+        'DataSet',
+        secondary='community_datasets',
+        back_populates='community_datasets'
+    )
 
     def __repr__(self):
         return f'Community<{self.id}>'

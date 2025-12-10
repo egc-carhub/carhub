@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 from app.modules.auth.models import User
+from app.modules.community.models import Community
 from app.modules.dataset.models import Author, DataSet, DSMetaData, DSMetrics, PublicationType
 from app.modules.featuremodel.models import FeatureModel, FMMetaData
 from app.modules.hubfile.models import Hubfile
@@ -20,8 +21,15 @@ class DataSetSeeder(BaseSeeder):
         user1 = User.query.filter_by(email="user1@example.com").first()
         user2 = User.query.filter_by(email="user2@example.com").first()
 
+        community_carreras = Community.query.filter_by(name="Carreras").first()
+        community_de_mercado = Community.query.filter_by(name="De mercado").first()
+        community_electricos = Community.query.filter_by(name="Eléctricos").first()
+
         if not user1 or not user2:
             raise Exception("Users not found. Please seed users first.")
+
+        if not community_carreras or not community_de_mercado or not community_electricos:
+            raise Exception("Communities not found. Please seed communities first.")
 
         # Create DSMetrics instance
         ds_metrics = DSMetrics(number_of_models="5", number_of_features="50")
@@ -60,10 +68,18 @@ class DataSetSeeder(BaseSeeder):
             DataSet(
                 user_id=user1.id if i % 2 == 0 else user2.id,
                 ds_meta_data_id=seeded_ds_meta_data[i].id,
-                created_at=datetime.now(timezone.utc),
+                created_at=datetime.now(timezone.utc)
             )
             for i in range(4)
         ]
+        datasets[0].community_datasets.append(community_de_mercado)
+        datasets[1].community_datasets.append(community_de_mercado)
+        datasets[1].community_datasets.append(community_carreras)
+        datasets[1].community_datasets.append(community_electricos)
+        datasets[2].community_datasets.append(community_carreras)
+        datasets[2].community_datasets.append(community_de_mercado)
+        datasets[3].community_datasets.append(community_carreras)
+        datasets[3].community_datasets.append(community_de_mercado)
         seeded_datasets = self.seed(datasets)
 
         # Assume there are 12 CAR files, create corresponding FMMetaData and FeatureModel
