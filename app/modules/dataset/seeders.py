@@ -14,7 +14,7 @@ from core.seeders.BaseSeeder import BaseSeeder
 
 class DataSetSeeder(BaseSeeder):
 
-    priority = 2  # Lower priority
+    priority = 3  # Lower priority
 
     def run(self):
         # Retrieve users
