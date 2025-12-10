@@ -8,6 +8,8 @@ from app.modules.dataset.models import DataSet
 from app.modules.profile import profile_bp
 from app.modules.profile.forms import UserProfileForm
 from app.modules.profile.services import UserProfileService
+from app.modules.notifications.models import user_follows_user
+from app.extensions import db as extensions_db
 
 
 @profile_bp.route("/profile/edit", methods=["GET", "POST"])
@@ -74,6 +76,23 @@ def user_profile(user_id):
     )
 
     total_datasets_count = db.session.query(DataSet).filter(DataSet.user_id == user.id).count()
+    # Determine if the current authenticated user follows this user so the template
+    # can render the correct follow/unfollow label on page load.
+    is_following = False
+    try:
+        from flask_login import current_user as _current_user
+
+        if _current_user.is_authenticated:
+            exists = (
+                extensions_db.session.query(user_follows_user)
+                .filter(user_follows_user.c.follower_id == _current_user.id)
+                .filter(user_follows_user.c.followed_id == user.id)
+                .first()
+            )
+            is_following = bool(exists)
+    except Exception:
+        # Non-fatal: if something goes wrong reading the follow table, default to False.
+        is_following = False
 
     return render_template(
         "profile/summary.html",
@@ -82,4 +101,5 @@ def user_profile(user_id):
         datasets=user_datasets_pagination.items,
         pagination=user_datasets_pagination,
         total_datasets=total_datasets_count,
+        is_following=is_following,
     )

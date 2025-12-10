@@ -8,6 +8,14 @@ from typing import Optional
 from flask import request
 
 from app.modules.auth.services import AuthenticationService
+from app.extensions import db
+from app.modules.notifications.models import (
+    user_follows_user,
+    user_follows_community,
+    Notification,
+)
+from app.modules.auth.models import User
+from app.modules.notifications.services import NotificationService
 from app.modules.dataset.models import DataSet, DSMetaData, DSViewRecord
 from app.modules.dataset.repositories import (
     AuthorRepository,
@@ -127,6 +135,64 @@ class DataSetService(BaseService):
                 )
                 fm.files.append(file)
             self.repository.session.commit()
+
+            # --- Notifications: notify users who follow this author (current_user) ---
+            try:
+                followers = (
+                    db.session.query(User)
+                    .join(user_follows_user, User.id == user_follows_user.c.follower_id)
+                    .filter(user_follows_user.c.followed_id == current_user.id)
+                    .all()
+                )
+
+                notification_svc = NotificationService()
+                for follower in followers:
+                    notif = Notification(
+                        recipient_id=follower.id,
+                        actor_id=current_user.id,
+                        dataset_id=dataset.id,
+                        type="author_published_dataset",
+                        message=f"{current_user.email} published dataset '{dataset.ds_meta_data.title}'",
+                    )
+                    db.session.add(notif)
+                    # send email async if follower has email
+                    try:
+                        if follower.email:
+                            notification_svc.send_email(
+                                recipient_email=follower.email,
+                                subject=f"New dataset from {current_user.email}",
+                                body=(
+                                    f"{current_user.email} published dataset: {dataset.ds_meta_data.title}\n\n"
+                                    f"View: {request.host_url.rstrip('/')}/dataset/{dataset.id}"
+                                ),
+                            )
+                    except Exception:
+                        logger.exception("Failed scheduling email for follower")
+
+                # Example: optionally notify users who follow the community if dataset has community_id
+                # (DataSet model currently has no community relation, but this is a placeholder)
+                if hasattr(dataset, "community_id") and dataset.community_id:
+                    community_followers = (
+                        db.session.query(User)
+                        .join(user_follows_community, User.id == user_follows_community.c.user_id)
+                        .filter(user_follows_community.c.community_id == dataset.community_id)
+                        .all()
+                    )
+                    for follower in community_followers:
+                        notif = Notification(
+                            recipient_id=follower.id,
+                            actor_id=current_user.id,
+                            community_id=dataset.community_id,
+                            dataset_id=dataset.id,
+                            type="community_dataset_added",
+                            message=f"A new dataset '{dataset.ds_meta_data.title}' was added to a community you follow",
+                        )
+                        db.session.add(notif)
+
+                db.session.commit()
+            except Exception as exc_notif:
+                logger.exception(f"Exception while creating notifications: {exc_notif}")
+                db.session.rollback()
         except Exception as exc:
             logger.info(f"Exception creating dataset from form...: {exc}")
             self.repository.session.rollback()

@@ -27,6 +27,10 @@ def create_app(config_name="development"):
     # Initialize SQLAlchemy and Migrate with the app
     db.init_app(app)
     migrate.init_app(app, db)
+    # Initialize Mail (Flask-Mail)
+    from app.extensions import mail
+
+    mail.init_app(app)
 
     # Register modules
     module_manager = ModuleManager(app)
