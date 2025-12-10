@@ -64,6 +64,13 @@ class DSMetaData(db.Model):
     authors = db.relationship("Author", backref="ds_meta_data", lazy=True, cascade="all, delete")
 
 
+community_datasets = db.Table(
+    'community_datasets',
+    db.Column('dataset_id', db.Integer, db.ForeignKey('data_set.id'), primary_key=True),
+    db.Column('community_id', db.Integer, db.ForeignKey('community.id'), primary_key=True)
+)
+
+
 class DataSet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
@@ -73,6 +80,12 @@ class DataSet(db.Model):
 
     ds_meta_data = db.relationship("DSMetaData", backref=db.backref("data_set", uselist=False))
     feature_models = db.relationship("FeatureModel", backref="data_set", lazy=True, cascade="all, delete")
+
+    community_datasets = db.relationship(
+        'Community',
+        secondary=community_datasets,
+        back_populates='datasets'
+    )
 
     def name(self):
         return self.ds_meta_data.title
