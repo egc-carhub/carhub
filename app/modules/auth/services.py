@@ -24,7 +24,6 @@ class AuthenticationService(BaseService):
         if user and user.check_password(password):
             login_user(user, remember=remember)
 
-            # Crear sesión igual que la de prueba
             user_session = UserSession(
                 user_id=user.id,
                 ip_address=request.remote_addr,
@@ -38,9 +37,6 @@ class AuthenticationService(BaseService):
 
             # Guardar token de sesión en flask.session
             session["_id"] = user_session.session_token
-
-            # DEBUG
-            print("REAL SESSION CREATED:", user_session.id, user_session.session_token)
 
             return True
         return False
