@@ -6,6 +6,42 @@
 
 <h1 class="h3 mb-3">User profile</h1>
 
+{% if current_user.is_authenticated and user.id != current_user.id %}
+    <div class="mb-3">
+    {% set _is_following = is_following if (is_following is defined) else False %}
+        <button id="follow-btn" class="btn {% if _is_following %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            {% if _is_following %}Unfollow{% else %}Follow{% endif %}
+        </button>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            const btn = document.getElementById('follow-btn');
+            btn.addEventListener('click', async function(){
+                btn.disabled = true;
+                try {
+                    const res = await fetch('/follow/user/{{ user.id }}', { method: 'POST', credentials: 'same-origin' });
+                    const data = await res.json();
+                    // Prefer explicit server-side flag `following` when available to avoid UI desync
+                    const following = typeof data.following === 'boolean' ? data.following : (data.message && !data.message.toLowerCase().includes('unfollow'));
+                    if (following) {
+                        btn.textContent = 'Unfollow';
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-primary');
+                    } else {
+                        btn.textContent = 'Follow';
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-outline-primary');
+                    }
+                } catch (e) {
+                    console.error(e);
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        });
+    </script>
+{% endif %}
+
 <div class="row">
 
     <!-- Profile Information -->
