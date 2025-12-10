@@ -5,7 +5,7 @@ import pytest
 from flask import url_for
 
 from app.extensions import db
-from app.modules.auth.models import User
+from app.modules.auth.models import User, UserSession
 from app.modules.auth.repositories import UserRepository
 from app.modules.auth.services import AuthenticationService
 from app.modules.auth.services.two_factor_service import TwoFactorService
@@ -155,3 +155,89 @@ def test_enable_and_disable_2fa_on_user(test_app, clean_database):
     user.two_factor_enabled = False
     db.session.commit()
     assert user.two_factor_enabled is False
+
+# =========================
+# Tests de sesiones de usuario
+# =========================
+
+import pytest
+from flask import url_for
+from app.extensions import db
+from app.modules.auth.models import User
+from app.modules.auth.services.two_factor_service import TwoFactorService
+
+def perform_login_with_2fa_endpoint(client, user):
+    """
+    Helper function para simular login + 2FA en los tests de sesión.
+    """
+    # Login inicial
+    resp = client.post(
+        "/login",
+        data=dict(email=user.email, password="pass1234"),
+        follow_redirects=True,
+    )
+    assert resp.request.path != url_for("auth.login")
+
+    # Envío del código 2FA
+    code = pyotp.TOTP(user.two_factor_secret).now()
+    resp = client.post(
+        "/verify-2fa",
+        data=dict(code=code),
+        follow_redirects=True,
+    )
+    assert resp.request.path != url_for("auth.login")
+    return resp
+
+def test_login_creates_session(test_client, clean_database):
+    """Tras login + 2FA, el usuario tiene sesión activa en Flask."""
+    user = User(email="user2@example.com", password="1234")
+    user.two_factor_secret = TwoFactorService.generate_secret()
+    user.two_factor_enabled = True
+    db.session.add(user)
+    db.session.commit()
+
+    # Login + 2FA
+    perform_login_with_2fa_endpoint(test_client, user)
+
+    # Revisar sesión de Flask-Login
+    with test_client.session_transaction() as sess:
+        assert "_user_id" in sess, "No se creó sesión tras login"
+        user_id_in_session = int(sess["_user_id"])
+        assert user_id_in_session == user.id, "ID de usuario en sesión no coincide con el usuario logueado"
+
+
+def test_multiple_sessions_for_user(test_client, clean_database):
+    """Verifica que un usuario puede iniciar múltiples sesiones."""
+    user = User(email="user2fa@example.com", password="pass1234")
+    user.two_factor_secret = TwoFactorService.generate_secret()
+    user.two_factor_enabled = True
+    db.session.add(user)
+    db.session.commit()
+
+    # Login dos veces simula múltiples sesiones
+    resp1 = perform_login_with_2fa_endpoint(test_client, user)
+    resp2 = perform_login_with_2fa_endpoint(test_client, user)
+    
+    assert resp1 != resp2, "Se esperaba que cada sesión sea diferente"
+
+def test_sessions_are_user_specific(test_client, clean_database):
+    """Verifica que las sesiones son específicas de cada usuario."""
+    # Primer usuario
+    user1 = User(email="user1@example.com", password="pass1234")
+    user1.two_factor_secret = TwoFactorService.generate_secret()
+    user1.two_factor_enabled = True
+    db.session.add(user1)
+
+    # Segundo usuario
+    user2 = User(email="user2@example.com", password="pass1234")
+    user2.two_factor_secret = TwoFactorService.generate_secret()
+    user2.two_factor_enabled = True
+    db.session.add(user2)
+    db.session.commit()
+
+    # Login del primer usuario
+    resp1 = perform_login_with_2fa_endpoint(test_client, user1)
+    # Login del segundo usuario
+    resp2 = perform_login_with_2fa_endpoint(test_client, user2)
+
+    assert resp1 != resp2, "Cada usuario debería tener su propia sesión"
