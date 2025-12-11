@@ -53,7 +53,25 @@ def login():
         )
 
     if not user.two_factor_enabled:
+        # Log the user in and create a persistent session record (even if 2FA is not enabled)
         login_user(user)
+
+        # Crear sesión en DB (igual que en la verificación 2FA)
+        session_token = str(uuid4())
+        user_session = UserSession(
+            user_id=user.id,
+            ip_address=request.remote_addr,
+            user_agent=request.headers.get("User-Agent"),
+            session_token=session_token,
+            created_at=datetime.utcnow(),
+            last_activity=datetime.utcnow(),
+        )
+        db.session.add(user_session)
+        db.session.commit()
+
+        # Guardar token en flask_session
+        flask_session["_id"] = session_token
+
         msg = "Inicio de sesión exitoso sin 2FA"
         return (jsonify({"message": msg}), 200) if is_json else redirect(url_for("public.index"))
 
