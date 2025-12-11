@@ -139,6 +139,22 @@
 
                 </div>
                 {% endif %}
+
+                <div class="row mb-2">
+
+                    <div class="col-md-4 col-12">
+                        <span class=" text-secondary">
+                            Communities:
+                        </span>
+                    </div>
+                    <div class="col-md-8 col-12">
+                        {% for community in dataset.community_datasets %}
+                            <a href="/community/{{ community.id }}" class="badge bg-secondary">{{ community.name }}</a>
+                        {% endfor %}
+                    </div>
+
+                </div>
+                
                 <div class="row mb-2">
 
                     <div class="col-md-4 col-12">

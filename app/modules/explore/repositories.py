@@ -6,13 +6,14 @@ from sqlalchemy import any_, or_
 from app.modules.dataset.models import Author, DataSet, DSMetaData, PublicationType
 from app.modules.featuremodel.models import FeatureModel, FMMetaData
 from core.repositories.BaseRepository import BaseRepository
+from app.modules.community.models import Community
 
 
 class ExploreRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
 
-    def filter(self, query="", sorting="newest", publication_type="any", tags=[], **kwargs):
+    def filter(self, query="", sorting="newest", publication_type="any", tags=[], community="any", **kwargs):
         # Normalize and remove unwanted characters
         normalized_query = unidecode.unidecode(query).lower()
         cleaned_query = re.sub(r'[,.":\'()\[\]^;!¡¿?]', "", normalized_query)
@@ -49,6 +50,9 @@ class ExploreRepository(BaseRepository):
 
             if matching_type is not None:
                 datasets = datasets.filter(DSMetaData.publication_type == matching_type.name)
+
+        if community != "any":
+            datasets = datasets.join(DataSet.community_datasets).filter(Community.id == community)
 
         if tags:
             datasets = datasets.filter(DSMetaData.tags.ilike(any_(f"%{tag}%" for tag in tags)))

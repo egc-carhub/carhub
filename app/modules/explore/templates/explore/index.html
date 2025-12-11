@@ -57,6 +57,19 @@
 
                         <div class="col-lg-6">
                             <div class="mb-3">
+                                <label class="form-label" for="community_filter">Filter by community</label>
+                                <select class="form-control" id="community_filter" name="community_filter">
+                                    <option value="any">Any</option>
+
+                                    {% for c in communities %}
+                                        <option value="{{ c.id }}">{{ c.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="mb-3">
                                 <label class="form-label" for="publication_type">Filter by publication
                                     type</label>
                                 <select class="form-control" id="publication_type" name="publication_type"

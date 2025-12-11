@@ -21,6 +21,7 @@ function send_query() {
                 query: document.querySelector('#query').value,
                 publication_type: document.querySelector('#publication_type').value,
                 sorting: document.querySelector('[name="sorting"]:checked').value,
+                community: document.querySelector('#community_filter').value,
             };
 
             console.log(document.querySelector('#publication_type').value);
@@ -97,6 +98,19 @@ function send_query() {
 
                                         <div class="col-md-4 col-12">
                                             <span class=" text-secondary">
+                                                Communities
+                                            </span>
+                                        </div>
+                                        <div class="col-md-8 col-12">
+                                            ${dataset.communities.map(community => `<span class="badge bg-primary me-1" style="cursor: pointer;" onclick="set_community_as_query('${community.id}')">${community.name}</span>`).join('')}
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row mb-2">
+
+                                        <div class="col-md-4 col-12">
+                                            <span class=" text-secondary">
                                                 Tags
                                             </span>
                                         </div>
@@ -146,6 +160,12 @@ function set_tag_as_query(tagName) {
     queryInput.dispatchEvent(new Event('input', {bubbles: true}));
 }
 
+function set_community_as_query(communityName) {
+    const queryInput = document.getElementById('community_filter');
+    queryInput.value = communityName.trim();
+    queryInput.dispatchEvent(new Event('input', {bubbles: true}));
+}
+
 function set_publication_type_as_query(publicationType) {
     const publicationTypeSelect = document.getElementById('publication_type');
     for (let i = 0; i < publicationTypeSelect.options.length; i++) {
@@ -177,6 +197,9 @@ function clearFilters() {
     sortingOptions.forEach(option => {
         option.checked = option.value == "newest"; // replace "default" with whatever your default value is
         // option.dispatchEvent(new Event('input', {bubbles: true}));
+
+    let communitySelect = document.querySelector('#community_filter');
+    communitySelect.value = "any";
     });
 
     // Perform a new search with the reset filters
