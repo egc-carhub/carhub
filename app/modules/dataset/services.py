@@ -12,7 +12,6 @@ from app.extensions import db
 from app.modules.notifications.models import (
     user_follows_user,
     user_follows_community,
-    Notification,
 )
 from app.modules.auth.models import User
 from app.modules.notifications.services import NotificationService
@@ -147,27 +146,16 @@ class DataSetService(BaseService):
 
                 notification_svc = NotificationService()
                 for follower in followers:
-                    notif = Notification(
-                        recipient_id=follower.id,
-                        actor_id=current_user.id,
-                        dataset_id=dataset.id,
-                        type="author_published_dataset",
-                        message=f"{current_user.email} published dataset '{dataset.ds_meta_data.title}'",
-                    )
-                    db.session.add(notif)
-                    # send email async if follower has email
                     try:
-                        if follower.email:
-                            notification_svc.send_email(
-                                recipient_email=follower.email,
-                                subject=f"New dataset from {current_user.email}",
-                                body=(
-                                    f"{current_user.email} published dataset: {dataset.ds_meta_data.title}\n\n"
-                                    f"View: {request.host_url.rstrip('/')}/dataset/{dataset.id}"
-                                ),
-                            )
+                        notification_svc.create_and_notify(
+                            recipient_id=follower.id,
+                            actor_id=current_user.id,
+                            dataset_id=dataset.id,
+                            type="author_published_dataset",
+                            message=f"{current_user.email} published dataset '{dataset.ds_meta_data.title}'",
+                        )
                     except Exception:
-                        logger.exception("Failed scheduling email for follower")
+                        logger.exception("Failed creating notification for follower")
 
                 # Example: optionally notify users who follow the community if dataset has community_id
                 # (DataSet model currently has no community relation, but this is a placeholder)
@@ -179,15 +167,20 @@ class DataSetService(BaseService):
                         .all()
                     )
                     for follower in community_followers:
-                        notif = Notification(
-                            recipient_id=follower.id,
-                            actor_id=current_user.id,
-                            community_id=dataset.community_id,
-                            dataset_id=dataset.id,
-                            type="community_dataset_added",
-                            message=f"A new dataset '{dataset.ds_meta_data.title}' was added to a community you follow",
-                        )
-                        db.session.add(notif)
+                        try:
+                            notification_svc.create_and_notify(
+                                recipient_id=follower.id,
+                                actor_id=current_user.id,
+                                community_id=dataset.community_id,
+                                dataset_id=dataset.id,
+                                type="community_dataset_added",
+                                message=(
+                                    f"A new dataset '{dataset.ds_meta_data.title}' "
+                                    "was added to a community you follow"
+                                ),
+                            )
+                        except Exception:
+                            logger.exception("Failed creating notification for community follower")
 
                 db.session.commit()
             except Exception as exc_notif:
