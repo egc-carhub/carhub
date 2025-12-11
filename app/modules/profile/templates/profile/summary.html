@@ -178,6 +178,25 @@
 </div>
 {% endif %}
 
+<!-- Profile-specific footer: same content as site footer but placed inside profile page -->
+<footer class="footer mt-4">
+    <div class="container-fluid">
+        <div class="row text-muted">
+            <div class="col-12 text-start">
+                <p class="mb-0">
+                    <strong>{{ FLASK_APP_NAME }} </strong> University of Seville · University of Malaga ·
+                    University of Ulm
+                </p>
+            </div>
+            <div class="col-12 text-start mt-2">
+                <a class="text-muted" href="https://github.com/diverso-lab/uvlhub" target="_blank">
+                    <i class="align-middle" data-feather="github"></i>
+                    Repository on GitHub</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
 {% endblock %}
 
 {% block scripts %}
