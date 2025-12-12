@@ -99,6 +99,13 @@ class DataSetRepository(BaseRepository):
             .all()
         )
 
+    def latest_uploaded(self):
+        return (
+            self.model.query.order_by(desc(self.model.id))
+            .limit(5)
+            .all()
+        )
+
 
 class DOIMappingRepository(BaseRepository):
     def __init__(self):
