@@ -31,6 +31,8 @@ from app.modules.hubfile.repositories import (
     HubfileViewRecordRepository,
 )
 from core.services.BaseService import BaseService
+from app.modules.community.models import Community
+
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +116,18 @@ class DataSetService(BaseService):
 
             dataset = self.create(commit=False, user_id=current_user.id, ds_meta_data_id=dsmetadata.id)
 
+            try:
+                # Asumimos que form.community.data es una lista de IDs (strings)
+                community_ids = form.community.data
+                for community_id in community_ids:
+                    community = Community.query.get(int(community_id))
+                    if community:
+                        dataset.community_datasets.append(community)
+                    else:
+                        logger.warning(f"Community with id {community_id} not found.")
+            except Exception as e:
+                logger.exception(f"Error assigning community: {e}")
+
             for feature_model in form.feature_models:
                 car_filename = feature_model.car_filename.data
                 fmmetadata = self.fmmetadata_repository.create(commit=False, **feature_model.get_fmmetadata())
@@ -157,13 +171,12 @@ class DataSetService(BaseService):
                     except Exception:
                         logger.exception("Failed creating notification for follower")
 
-                # Example: optionally notify users who follow the community if dataset has community_id
-                # (DataSet model currently has no community relation, but this is a placeholder)
-                if hasattr(dataset, "community_id") and dataset.community_id:
+                # Notify users who follow each community associated with the dataset
+                for community in dataset.community_datasets:
                     community_followers = (
                         db.session.query(User)
                         .join(user_follows_community, User.id == user_follows_community.c.user_id)
-                        .filter(user_follows_community.c.community_id == dataset.community_id)
+                        .filter(user_follows_community.c.community_id == community.id)
                         .all()
                     )
                     for follower in community_followers:
@@ -171,7 +184,7 @@ class DataSetService(BaseService):
                             notification_svc.create_and_notify(
                                 recipient_id=follower.id,
                                 actor_id=current_user.id,
-                                community_id=dataset.community_id,
+                                community_id=community.id,
                                 dataset_id=dataset.id,
                                 type="community_dataset_added",
                                 message=(

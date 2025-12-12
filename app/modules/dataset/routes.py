@@ -12,7 +12,6 @@ from flask_login import current_user, login_required
 
 from app.modules.dataset import dataset_bp
 from app.modules.dataset.forms import DataSetForm
-from app.modules.dataset.models import DSDownloadRecord
 from app.modules.dataset.services import (
     AuthorService,
     DataSetService,
@@ -22,6 +21,7 @@ from app.modules.dataset.services import (
     DSViewRecordService,
 )
 from app.modules.fakenodo.services import FakenodoService
+from app.modules.community.models import Community
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,8 @@ ds_view_record_service = DSViewRecordService()
 @login_required
 def create_dataset():
     form = DataSetForm()
+    communities = Community.query.all()
+    form.community.choices = [(c.id, c.name) for c in communities]
     if request.method == "POST":
 
         dataset = None
@@ -57,7 +59,7 @@ def create_dataset():
         # send dataset as deposition to Zenodo
         data = {}
         try:
-            zenodo_response_json = fakenodo_servicecreate_new_deposition(dataset)
+            zenodo_response_json = fakenodo_service.create_new_deposition(dataset)
             response_data = json.dumps(zenodo_response_json)
             data = json.loads(response_data)
         except Exception as exc:
@@ -74,13 +76,13 @@ def create_dataset():
             try:
                 # iterate for each feature model (one feature model = one request to Zenodo)
                 for feature_model in dataset.feature_models:
-                    fakenodo_serviceupload_file(dataset, deposition_id, feature_model)
+                    fakenodo_service.upload_file(dataset, deposition_id, feature_model)
 
                 # publish deposition
-                fakenodo_servicepublish_deposition(deposition_id)
+                fakenodo_service.publish_deposition(deposition_id)
 
                 # update DOI
-                deposition_doi = fakenodo_serviceget_doi(deposition_id)
+                deposition_doi = fakenodo_service.get_doi(deposition_id)
                 dataset_service.update_dsmetadata(dataset.ds_meta_data_id, dataset_doi=deposition_doi)
             except Exception as e:
                 msg = f"it has not been possible upload feature models in Zenodo and update the DOI: {e}"
