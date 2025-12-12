@@ -37,7 +37,7 @@ class ExploreRepository(BaseRepository):
             .join(DataSet.feature_models)
             .join(FeatureModel.fm_meta_data)
             .filter(or_(*filters))
-            .filter(DSMetaData.dataset_doi.isnot(None))  # Exclude datasets with empty dataset_doi
+            # .filter(DSMetaData.dataset_doi.isnot(None))  # Exclude datasets with empty dataset_doi
         )
 
         if publication_type != "any":
