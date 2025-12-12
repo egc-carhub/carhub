@@ -1,8 +1,12 @@
 import os
+from datetime import datetime
+from uuid import uuid4
 
+from flask import request, session
 from flask_login import current_user, login_user
 
-from app.modules.auth.models import User
+from app.extensions import db
+from app.modules.auth.models import User, UserSession
 from app.modules.auth.repositories import UserRepository
 from app.modules.profile.models import UserProfile
 from app.modules.profile.repositories import UserProfileRepository
@@ -76,3 +80,6 @@ class AuthenticationService(BaseService):
 
     def temp_folder_by_user(self, user: User) -> str:
         return os.path.join(uploads_folder_name(), "temp", str(user.id))
+
+    def get_active_sessions(self, user: User):
+        return UserSession.query.filter_by(user_id=user.id, is_active=True).all()
