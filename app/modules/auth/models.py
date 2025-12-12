@@ -57,6 +57,7 @@ class UserSession(db.Model):
 
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     last_activity = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    is_active = db.Column(db.Boolean, default=True)
 
     # Relationship
     user = db.relationship("User", backref="sessions")
