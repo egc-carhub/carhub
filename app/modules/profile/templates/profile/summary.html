@@ -62,6 +62,7 @@
     </div>
 
     <!-- Active Sessions -->
+    {% if current_user.is_authenticated and user.id == current_user.id %}
     <div class="col-12 col-md-8 col-lg-6 mt-4"> 
         <div class="card shadow-sm">
             <div class="card-header card-dark">
@@ -94,6 +95,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
 </div>
 
@@ -189,6 +191,11 @@
     <script>
     document.addEventListener("DOMContentLoaded", function() {
 
+        // Sólo inicializar la lógica de sesiones si el DOM contiene la tabla/botones
+        if (!document.getElementById("sessions-table")) {
+            return;
+        }
+
         function loadSessions() {
             fetch("/sessions")
                 .then(r => r.json())
@@ -221,9 +228,9 @@
             }).then(() => loadSessions());
         };
 
-        document
-            .getElementById("add-test-session")
-            .addEventListener("click", function() {
+        const addBtn = document.getElementById("add-test-session");
+        if (addBtn) {
+            addBtn.addEventListener("click", function() {
                 fetch("/sessions/test")
                     .then(r => r.json())
                     .then(data => {
@@ -231,14 +238,16 @@
                         loadSessions(); // recarga la tabla
                     });
             });
+        }
 
-        document
-            .getElementById("close-all-sessions")
-            .addEventListener("click", function() {
+        const closeAllBtn = document.getElementById("close-all-sessions");
+        if (closeAllBtn) {
+            closeAllBtn.addEventListener("click", function() {
                 fetch("/sessions", {
                     method: "DELETE"
                 }).then(() => loadSessions());
             });
+        }
 
         loadSessions();
     });
