@@ -159,6 +159,7 @@ class DataSetService(BaseService):
                 )
 
                 notification_svc = NotificationService()
+                logger.info(f"Notifying {len(followers)} followers of author {current_user.id}")
                 for follower in followers:
                     try:
                         notification_svc.create_and_notify(
@@ -173,27 +174,31 @@ class DataSetService(BaseService):
 
                 # Notify users who follow each community associated with the dataset
                 for community in dataset.community_datasets:
-                    community_followers = (
-                        db.session.query(User)
-                        .join(user_follows_community, User.id == user_follows_community.c.user_id)
-                        .filter(user_follows_community.c.community_id == community.id)
-                        .all()
-                    )
-                    for follower in community_followers:
-                        try:
-                            notification_svc.create_and_notify(
-                                recipient_id=follower.id,
-                                actor_id=current_user.id,
-                                community_id=community.id,
-                                dataset_id=dataset.id,
-                                type="community_dataset_added",
-                                message=(
-                                    f"A new dataset '{dataset.ds_meta_data.title}' "
-                                    "was added to a community you follow"
-                                ),
-                            )
-                        except Exception:
-                            logger.exception("Failed creating notification for community follower")
+                    try:
+                        community_followers = (
+                            db.session.query(User)
+                            .join(user_follows_community, User.id == user_follows_community.c.user_id)
+                            .filter(user_follows_community.c.community_id == community.id)
+                            .all()
+                        )
+                        logger.info(f"Community {community.id}: notifying {len(community_followers)} followers")
+                        for follower in community_followers:
+                            try:
+                                notification_svc.create_and_notify(
+                                    recipient_id=follower.id,
+                                    actor_id=current_user.id,
+                                    community_id=community.id,
+                                    dataset_id=dataset.id,
+                                    type="community_dataset_added",
+                                    message=(
+                                        f"A new dataset '{dataset.ds_meta_data.title}' "
+                                        "was added to a community you follow"
+                                    ),
+                                )
+                            except Exception:
+                                logger.exception("Failed creating notification for community follower")
+                    except Exception:
+                        logger.exception("Failed retrieving community followers for community %s", community.id)
 
                 db.session.commit()
             except Exception as exc_notif:
