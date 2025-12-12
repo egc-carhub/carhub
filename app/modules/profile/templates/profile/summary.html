@@ -88,10 +88,6 @@
                     Close all other sessions
                 </button>
 
-                <button id="add-test-session" class="btn btn-primary btn-sm mt-3">
-                Add Test Session
-                </button>
-
             </div>
         </div>
     </div>
@@ -227,18 +223,6 @@
                 method: "DELETE"
             }).then(() => loadSessions());
         };
-
-        const addBtn = document.getElementById("add-test-session");
-        if (addBtn) {
-            addBtn.addEventListener("click", function() {
-                fetch("/sessions/test")
-                    .then(r => r.json())
-                    .then(data => {
-                        console.log("Test session created:", data);
-                        loadSessions(); // recarga la tabla
-                    });
-            });
-        }
 
         const closeAllBtn = document.getElementById("close-all-sessions");
         if (closeAllBtn) {
