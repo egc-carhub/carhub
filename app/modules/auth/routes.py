@@ -1,4 +1,4 @@
-from flask import jsonify, redirect, render_template, request, session, url_for
+from flask import jsonify, redirect, render_template, request, session, url_for, current_app
 from flask_login import current_user, login_required, login_user, logout_user
 
 from app.extensions import db
@@ -68,13 +68,38 @@ def logout():
     return redirect(url_for("public.index"))
 
 
+@auth_bp.before_app_request
+def ensure_session_active():
+    """Forzar logout si la sesión actual en la BD está marcada como inactiva."""
+    try:
+        if current_user.is_authenticated:
+            current_token = session.get("_id")
+            if not current_token:
+                return None
+
+            user_session = UserSession.query.filter_by(user_id=current_user.id, session_token=current_token).first()
+            if user_session is None or not user_session.is_active:
+                # Sesión invalidada desde otro dispositivo -> forzar logout aquí
+                logout_user()
+                session.clear()
+                return redirect(url_for("public.index"))
+    except Exception as exc:
+        current_app.logger.exception("Error comprobando is_active de la sesión: %s", exc)
+    return None
+
+
 @auth_bp.route("/sessions", methods=["GET"])
 @login_required
 def list_sessions():
-    sessions = UserSession.query.filter_by(user_id=current_user.id).all()
-
-    # DEBUG: imprime las sesiones encontradas
-    print("SESSIONS QUERY RESULT:", sessions)
+    try:
+        # Usar el service pasando el objeto User; si no existe el método, usar fallback directo a la BD
+        if hasattr(authentication_service, "get_active_sessions"):
+            sessions = authentication_service.get_active_sessions(current_user)
+        else:
+            sessions = UserSession.query.filter_by(user_id=current_user.id, is_active=True).all()
+    except Exception as exc:
+        current_app.logger.exception("Error fetching active sessions: %s", exc)
+        return jsonify([]), 500
 
     current_session_id = session.get("_id")
 
@@ -83,15 +108,12 @@ def list_sessions():
             "id": s.id,
             "ip": s.ip_address,
             "user_agent": s.user_agent,
-            "created_at": s.created_at.isoformat(),
-            "last_activity": s.last_activity.isoformat(),
+            "created_at": s.created_at.isoformat() if s.created_at else None,
+            "last_activity": s.last_activity.isoformat() if s.last_activity else None,
             "is_current": s.session_token == current_session_id,
         }
         for s in sessions
     ]
-
-    # DEBUG: imprime los datos que se van a devolver
-    print("DATA SENT TO FRONTEND:", data)
 
     return jsonify(data)
 
@@ -104,27 +126,38 @@ def delete_session(session_id):
     if user_session is None or user_session.user_id != current_user.id:
         return jsonify({"error": "Session not found"}), 404
 
-    # Evitar borrar la sesión que está usando actualmente
-    if user_session.session_token == session.get("_id"):
-        return jsonify({"error": "Cannot delete current session"}), 400
-
-    db.session.delete(user_session)
+    # Marcar la sesión señalada como inactiva (no eliminar)
+    user_session.is_active = False
     db.session.commit()
 
-    return jsonify({"message": "Session closed"})
+    # Si el usuario ha cerrado su propia sesión desde el mismo dispositivo,
+    # hacer logout inmediato aquí
+    if user_session.session_token == session.get("_id"):
+        logout_user()
+        session.clear()
+        return jsonify({"message": "Current session closed"}), 200
+
+    # Para los otros dispositivos, el logout se producirá cuando hagan la siguiente petición
+    return jsonify({"message": "Session closed"}), 200
 
 
 @auth_bp.route("/sessions", methods=["DELETE"])
 @login_required
 def delete_other_sessions():
     current_id = session.get("_id")
+    if current_id is None:
+        return jsonify({"error": "Current session id missing"}), 400
 
-    UserSession.query.filter(UserSession.user_id == current_user.id, UserSession.session_token != current_id).delete(
-        synchronize_session=False
+    # Marcar como inactivas todas las demás sesiones activas del usuario
+    query = UserSession.query.filter(
+        UserSession.user_id == current_user.id,
+        UserSession.session_token != current_id,
+        UserSession.is_active == True,
     )
+    closed_count = query.update({"is_active": False}, synchronize_session=False)
 
     db.session.commit()
-    return jsonify({"message": "Other sessions closed"})
+    return jsonify({"message": "Other sessions closed", "closed": closed_count})
 
 
 @auth_bp.route("/sessions/test", methods=["GET"])
