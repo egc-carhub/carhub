@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import FieldList, FormField, SelectField, StringField, SubmitField, TextAreaField
+from wtforms import FieldList, FormField, SelectField, SelectMultipleField, StringField, SubmitField, TextAreaField
 from wtforms.validators import URL, DataRequired, Optional
 
 from app.modules.dataset.models import PublicationType
@@ -29,6 +29,11 @@ class FeatureModelForm(FlaskForm):
     publication_type = SelectField(
         "Publication type",
         choices=[(pt.value, pt.name.replace("_", " ").title()) for pt in PublicationType],
+        validators=[Optional()],
+    )
+    community = SelectMultipleField(
+        "Community",
+        choices=[],
         validators=[Optional()],
     )
     publication_doi = StringField("Publication DOI", validators=[Optional(), URL()])
@@ -61,6 +66,11 @@ class DataSetForm(FlaskForm):
         "Publication type",
         choices=[(pt.value, pt.name.replace("_", " ").title()) for pt in PublicationType],
         validators=[DataRequired()],
+    )
+    community = SelectMultipleField(
+        "Community",
+        choices=[],
+        validators=[Optional()],
     )
     publication_doi = StringField("Publication DOI", validators=[Optional(), URL()])
     dataset_doi = StringField("Dataset DOI", validators=[Optional(), URL()])
