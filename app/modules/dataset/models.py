@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from flask import request
+from flask import request, url_for
 from sqlalchemy import Enum as SQLAlchemyEnum
 
 from app import db
@@ -141,7 +141,7 @@ class DataSet(db.Model):
             "publication_doi": self.ds_meta_data.publication_doi,
             "dataset_doi": self.ds_meta_data.dataset_doi,
             "tags": self.ds_meta_data.tags.split(",") if self.ds_meta_data.tags else [],
-            "url": self.get_carhub_doi(),
+            "url": self.get_carhub_doi() if self.ds_meta_data.dataset_doi else url_for("dataset.get_unsynchronized_dataset", dataset_id=self.id),
             "download": f'{request.host_url.rstrip("/")}/dataset/download/{self.id}',
             "zenodo": self.get_zenodo_url(),
             "files": [file.to_dict() for fm in self.feature_models for file in fm.files],
