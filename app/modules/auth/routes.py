@@ -52,7 +52,19 @@ def login():
 
 @auth_bp.route("/logout")
 def logout():
+    try:
+        if current_user.is_authenticated:
+            current_token = session.get("_id")
+            if current_token:
+                user_session = UserSession.query.filter_by(user_id=current_user.id, session_token=current_token).first()
+                if user_session:
+                    user_session.is_active = False
+                    db.session.commit()
+    except Exception as exc:
+        print("Error closing user session on logout:", exc)
+
     logout_user()
+    session.clear()
     return redirect(url_for("public.index"))
 
 
