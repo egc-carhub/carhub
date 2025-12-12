@@ -114,9 +114,24 @@ class NotificationService:
         app = current_app._get_current_object()
         if getattr(app, "extensions", None) and "mail" in app.extensions:
             try:
-                msg = Message(subject=subject, recipients=[recipient_email], body=body)
-                thr = threading.Thread(target=_send_async_mail, args=(app, msg), daemon=True)
-                thr.start()
+                # Provide an explicit sender (tests may inject a dummy mail object
+                # without default_sender). Use MAIL_DEFAULT_SENDER if configured.
+                sender = app.config.get("MAIL_DEFAULT_SENDER")
+                msg = Message(subject=subject, recipients=[recipient_email], body=body, sender=sender)
+
+                # During tests send synchronously so test doubles can capture sends
+                # and to avoid thread timing issues.
+                if app.config.get("TESTING"):
+                    try:
+                        mail_obj = app.extensions.get('mail') if getattr(app, 'extensions', None) else None
+                    except Exception:
+                        mail_obj = None
+                    if not mail_obj:
+                        mail_obj = mail
+                    mail_obj.send(msg)
+                else:
+                    thr = threading.Thread(target=_send_async_mail, args=(app, msg), daemon=True)
+                    thr.start()
             except Exception:
                 logger.exception("Failed to enqueue email send")
         else:
