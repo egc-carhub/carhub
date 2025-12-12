@@ -178,17 +178,38 @@ class DataSetService(BaseService):
                 # Notify users who follow each community associated with the dataset
                 for community in dataset.community_datasets:
                     try:
+                        # followers via explicit follow action
                         community_followers = (
                             db.session.query(User)
                             .join(user_follows_community, User.id == user_follows_community.c.user_id)
                             .filter(user_follows_community.c.community_id == community.id)
                             .all()
                         )
-                        logger.info(f"Community {community.id}: notifying {len(community_followers)} followers")
-                        for follower in community_followers:
+
+                        # members of the community (join) — treat them as recipients as well
+                        community_members = (
+                            list(community.community_members)
+                            if getattr(community, "community_members", None)
+                            else []
+                        )
+
+                        # Build unique recipient ids, exclude the actor (uploader)
+                        recipient_ids = {u.id for u in community_followers} | {u.id for u in community_members}
+                        if current_user and getattr(current_user, 'id', None) in recipient_ids:
+                            recipient_ids.discard(current_user.id)
+
+                        logger.info(
+                            "Community %s: followers=%d members=%d unique_recipients=%d",
+                            community.id,
+                            len(community_followers),
+                            len(community_members),
+                            len(recipient_ids),
+                        )
+
+                        for rid in recipient_ids:
                             try:
                                 notification_svc.create_and_notify(
-                                    recipient_id=follower.id,
+                                    recipient_id=rid,
                                     actor_id=current_user.id,
                                     community_id=community.id,
                                     dataset_id=dataset.id,
@@ -199,9 +220,13 @@ class DataSetService(BaseService):
                                     ),
                                 )
                             except Exception:
-                                logger.exception("Failed creating notification for community follower")
+                                logger.exception(
+                                    "Failed creating notification for community recipient %s in community %s",
+                                    rid,
+                                    community.id,
+                                )
                     except Exception:
-                        logger.exception("Failed retrieving community followers for community %s", community.id)
+                        logger.exception("Failed retrieving community followers/members for community %s", community.id)
 
                 db.session.commit()
             except Exception as exc_notif:
