@@ -17,6 +17,7 @@ class AuthSeeder(BaseSeeder):
             ("user2@example.com", "1234"),
             # Add a third user without 2FA by default
             ("user3@example.com", "1234"),
+            ("user4@example.com", "1234"),
         ]
 
         users_to_create = []
@@ -54,7 +55,7 @@ class AuthSeeder(BaseSeeder):
         self.db.session.commit()
 
         # Create profiles for each user inserted (skip existing profiles)
-        names = [("John", "Doe"), ("Jane", "Doe"), ("Alice", "Smith")]
+        names = [("John", "Doe"), ("Jane", "Doe"), ("Alice", "Smith"), ("Renato", "Sanchez")]
         profiles_to_create = []
         for user, name in zip(seeded_users, names):
             # Ensure user exists (safe guard)
