@@ -239,8 +239,8 @@ class DataSetService(BaseService):
         return self.dsmetadata_repository.update(id, **kwargs)
 
     def get_carhub_doi(self, dataset: DataSet) -> str:
-        domain = os.getenv("DOMAIN", "localhost")
-        return f"http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}"
+        return f"{request.host_url.rstrip('/')}/doi/{dataset.ds_meta_data.dataset_doi}"
+
 
 
 class AuthorService(BaseService):
