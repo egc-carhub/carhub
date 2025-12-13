@@ -1,113 +1,148 @@
+import io
+
 import pytest
-from unittest.mock import MagicMock
-from app import db
-from app.modules.fakenodo.models import Deposition
-from app.modules.fakenodo.services import FakenodoService
+from flask import Flask
+
+from app.modules.fakenodo.routes import fakenodo_bp
 
 
-def test_sample_assertion(test_client):
+# ---------------------------------------------------------------------
+# Fixtures
+# ---------------------------------------------------------------------
+
+@pytest.fixture
+def app():
     """
-    Sample test to verify that the test framework and environment are working correctly.
-    It does not communicate with the Flask application; it only performs a simple assertion to
-    confirm that the tests in this module can be executed.
+    Crea una instancia de la app Flask para pruebas.
     """
-    greeting = "Hello, World!"
-    assert greeting == "Hello, World!", "The greeting does not coincide with 'Hello, World!'"
+    app = Flask(__name__)
+    app.config["TESTING"] = True
+    app.register_blueprint(fakenodo_bp, url_prefix="/api")
+    return app
 
 
-
-@pytest.fixture(scope='module')
-def test_client(test_client):
+@pytest.fixture
+def client(app):
     """
-    Prepara el entorno de pruebas con datos iniciales (semilla).
+    Cliente de pruebas de Flask.
     """
-    with test_client.application.app_context():
-        # Crear una deposición de prueba inicial para los tests de búsqueda
-        # Nota: Usamos dep_metadata directo porque estamos tocando el modelo, no el servicio
-        seed_deposition = Deposition(
-            dep_metadata={"title": "Seed Data", "upload_type": "dataset"},
-            status="published",
-            doi="10.1000/xyz123"
-        )
-        db.session.add(seed_deposition)
-        db.session.commit()
-
-    yield test_client
+    return app.test_client()
 
 
-def test_create_deposition_success(test_client):
+# ---------------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------------
+
+def test_create_deposition(client):
     """
-    Prueba: Crear una deposición correctamente a través del Servicio.
+    Prueba la creación de una deposición.
     """
-    with test_client.application.app_context():
-        # 1. Instanciamos el servicio (IMPORTANTE: es una clase)
-        service = FakenodoService()
+    response = client.post(
+        "/api/deposit/datasets",
+        json={"metadata": {"title": "Mi primer dataset"}}
+    )
 
-        # 2. Mockeamos el objeto de entrada (DSMetaData)
-        # Tu servicio espera un objeto con atributos .title, .publication_type.value, etc.
-        # No espera un diccionario simple.
-        mock_ds_metadata = MagicMock()
-        mock_ds_metadata.title = "Test Deposition from Mock"
-        mock_ds_metadata.description = "Created from unit test with MagicMock"
-        # Simulamos que es un dataset (publication_type.value == 'none')
-        mock_ds_metadata.publication_type.value = "none" 
-        mock_ds_metadata.authors = [] # Lista vacía de autores
-        mock_ds_metadata.tags = "tag1, tag2"
+    assert response.status_code == 201
 
-        # 3. Ejecución: Llamada al servicio
-        # El argumento en tu services.py se llama 'ds_meta_data', no 'dep_metadata'
-        response = service.create_new_deposition(ds_meta_data=mock_ds_metadata)
-
-        # 4. Verificación
-        # Tu servicio devuelve un diccionario, no un objeto Deposition
-        assert response is not None
-        assert "id" in response
-        assert response['message'] == "Deposition succesfully created in Fakenodo"
-        # Verificamos que los datos dentro del JSON coincidan con el Mock
-        assert response['metadata']['title'] == "Test Deposition from Mock"
-        assert response['metadata']['upload_type'] == "dataset"
+    data = response.get_json()
+    assert isinstance(data, dict)
+    assert "id" in data
+    assert isinstance(data["id"], int)
 
 
-def test_retrieve_deposition_by_doi(test_client):
+def test_upload_file_success(client):
     """
-    Prueba: Buscar una deposición existente por su DOI.
-    Usa el método del servicio get_doi o get_deposition.
+    Prueba la subida correcta de un archivo.
     """
-    with test_client.application.app_context():
-        service = FakenodoService()
-        
-        # Primero recuperamos el ID de la deposición semilla (creada en el fixture)
-        seed_dep = Deposition.query.filter_by(doi="10.1000/xyz123").first()
-        assert seed_dep is not None, "La semilla no se creó correctamente"
+    dep_id = 123456
 
-        # Probamos el método get_deposition del servicio
-        response = service.get_deposition(deposition_id=seed_dep.id)
-        
-        assert response['doi'] == "10.1000/xyz123"
-        assert response['status'] == "published"
+    data = {
+        "file": (io.BytesIO(b"contenido de prueba"), "modelo.car")
+    }
+
+    response = client.post(
+        f"/api/deposit/datasets/{dep_id}/files",
+        data=data,
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 201
+
+    response_data = response.get_json()
+    assert response_data["key"] == "modelo.car"
 
 
-def test_deposition_metadata_integrity(test_client):
+def test_upload_file_no_file_attached(client):
     """
-    Prueba: Verificar que el modelo Deposition guarda estructuras JSON correctamente.
-    Esta prueba es más de integración con la BD.
+    Prueba la subida sin adjuntar archivo.
     """
-    with test_client.application.app_context():
-        complex_metadata = {
-            "creators": [{"name": "Doe, John", "affiliation": "UVLHub"}],
-            "keywords": ["testing", "unit", "flask"]
-        }
-        
-        # Guardamos directamente usando el modelo
-        dep = Deposition(
-            dep_metadata=complex_metadata,
-            status="draft",
-            doi="temp-doi-999"
-        )
-        db.session.add(dep)
-        db.session.commit()
+    dep_id = 123456
 
-        # Recuperar y validar estructura anidada
-        saved_dep = Deposition.query.filter_by(doi="temp-doi-999").first()
-        assert saved_dep.dep_metadata['creators'][0]['name'] == "Doe, John"
-        assert "testing" in saved_dep.dep_metadata['keywords']
+    response = client.post(
+        f"/api/deposit/datasets/{dep_id}/files",
+        data={},
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 400
+
+    data = response.get_json()
+    assert "error" in data
+    assert data["error"] == "No se encontró ningún archivo"
+
+
+def test_publish_deposition(client):
+    """
+    Prueba la publicación de una deposición existente.
+    """
+    dep_id = 654321
+
+    response = client.post(
+        f"/api/deposit/datasets/{dep_id}/actions/publish"
+    )
+
+    assert response.status_code == 202
+
+    data = response.get_json()
+    assert data["id"] == dep_id
+    assert data["state"] == "done"
+    assert data["submitted"] is True
+    assert data["doi"] == f"10.9999/fakenodo.{dep_id}.v1"
+
+
+def test_full_deposition_flow(client):
+    """
+    Prueba el flujo completo:
+    1. Crear deposición
+    2. Subir archivo
+    3. Publicar
+    """
+    # 1. Crear deposición
+    create_resp = client.post(
+        "/api/deposit/datasets",
+        json={"metadata": {"title": "Dataset completo"}}
+    )
+    assert create_resp.status_code == 201
+
+    dep_id = create_resp.get_json()["id"]
+
+    # 2. Subir archivo
+    upload_resp = client.post(
+        f"/api/deposit/datasets/{dep_id}/files",
+        data={
+            "file": (io.BytesIO(b"datos del modelo"), "modelo_final.car")
+        },
+        content_type="multipart/form-data",
+    )
+    assert upload_resp.status_code == 201
+    assert upload_resp.get_json()["key"] == "modelo_final.car"
+
+    # 3. Publicar
+    publish_resp = client.post(
+        f"/api/deposit/datasets/{dep_id}/actions/publish"
+    )
+    assert publish_resp.status_code == 202
+
+    publish_data = publish_resp.get_json()
+    assert publish_data["id"] == dep_id
+    assert "doi" in publish_data
