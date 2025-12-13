@@ -140,6 +140,7 @@ class DataSet(db.Model):
             "publication_type": self.get_cleaned_publication_type(),
             "publication_doi": self.ds_meta_data.publication_doi,
             "dataset_doi": self.ds_meta_data.dataset_doi,
+            "communities": [{"id": c.id, "name": c.name}for c in self.community_datasets],
             "tags": self.ds_meta_data.tags.split(",") if self.ds_meta_data.tags else [],
             "url": self.get_carhub_doi() if self.ds_meta_data.dataset_doi else url_for("dataset.get_unsynchronized_dataset", dataset_id=self.id),
             "download": f'{request.host_url.rstrip("/")}/dataset/download/{self.id}',
