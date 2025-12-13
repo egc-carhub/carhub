@@ -30,6 +30,24 @@ def show_signup_form():
 
         # Log user
         login_user(user, remember=True)
+
+        # Crear sesión para el nuevo usuario
+        import uuid
+        from datetime import datetime
+        
+        session_token = str(uuid.uuid4())
+        user_session = UserSession(
+            user_id=user.id,
+            ip_address=request.remote_addr,
+            user_agent=request.headers.get("User-Agent"),
+            session_token=session_token,
+            created_at=datetime.utcnow(),
+            last_activity=datetime.utcnow(),
+        )
+        db.session.add(user_session)
+        db.session.commit()
+        session["_id"] = session_token
+
         return redirect(url_for("public.index"))
 
     return render_template("auth/signup_form.html", form=form)
