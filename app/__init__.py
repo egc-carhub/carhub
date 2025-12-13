@@ -39,6 +39,14 @@ def create_app(config_name="development"):
     # Register login manager
     from flask_login import LoginManager
 
+    try:
+        from app.modules.fakenodo.routes import fakenodo_bp
+
+        app.register_blueprint(fakenodo_bp, url_prefix="/api")
+        app.logger.info("Fakenodo blueprint registered successfully at /api.")
+    except ImportError:
+        app.logger.warning("Fakenodo blueprint (app/fakenodo/routes.py) not found. Skipping registration.")
+
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"

@@ -1,52 +1,56 @@
-import os
-import tempfile
+import logging
+import random
 
-from flask import jsonify, request, send_file
+from flask import Blueprint, jsonify
 
-from . import fakenodo_bp
-
-datasets = {}
-# Upload all files from dataset
+fakenodo_bp = Blueprint("fakenodo_api", __name__)
+logger = logging.getLogger(__name__)
 
 
-@fakenodo_bp.route("/fakenodo/upload", methods=["POST"])
-def upload_dataset():
-    global dataset_counter
-    file = request.files["file"]
-    if file:
-        dataset_id = dataset_counter
-        dataset_counter += 1
-        temp_dir = tempfile.mkdtemp()
-        file_path = os.path.join(temp_dir, file.filename)
-        file.save(file_path)
-        datasets[dataset_id] = {"id": dataset_id, "filename": file.filename, "file_path": file_path}
-        return jsonify({"id": dataset_id, "filename": file.filename}), 201
-    return jsonify({"error": "No file uploaded"}), 400
+@fakenodo_bp.route("/deposit/datasets", methods=["POST"])
+def create_deposition():
+    """
+    Simula la creación de una publicacion.
+    Devuelve un ID inventado (basado en el tiempo actual).
+    """
+    # Usamos el random como ID único y falso
+    fake_id = random.randint(100000, 999999)
+
+    # Devolvemos la estructura que ZenodoService espera pero pq
+    response_data = {"id": fake_id}
+
+    return response_data, 201  # 201 = Created
 
 
-# Get dataset info
+@fakenodo_bp.route("/deposit/datasets/<int:dep_id>/files", methods=["POST"])
+def upload_file(dep_id, data, files):
+    """
+    Simula la subida de un archivo.
+    No guarda el archivo, solo comprueba que venga uno y devuelve éxito.
+    """
+    if "file" not in files:
+        return jsonify({"error": "No se encontró ningún archivo"}), 400
+
+    # Obtenemos el nombre del archivo solo para el log
+    filename = files["file"].name
+
+    # Devolvemos una respuesta de éxito genérica
+    response_data = {"key": filename}
+
+    return response_data, 201  # 201 = Created
 
 
-@fakenodo_bp.route("/fakenodo/info/<dataset_id>", methods=["GET"])
-def get_Dataset(dataset_id):
-    dataset = datasets.get(dataset_id)
-    if dataset:
-        return send_file(dataset["file_path"], as_attachment=True, attachment_filename=dataset["filename"])
-    return jsonify({"error": "Dataset not found"}), 404
+@fakenodo_bp.route("/deposit/datasets/<int:dep_id>/actions/publish", methods=["POST"])
+def publish_deposition(dep_id):
+    """
+    Simula la publicación.
+    Inventa un DOI usando el ID del dataset.
+    """
+    # Inventamos un DOI que se vea realista
+    fake_doi = f"10.9999/fakenodo.{dep_id}.v1"
 
+    # Devolvemos la estructura que ZenodoService espera
+    response_data = {"id": dep_id, "doi": fake_doi, "state": "done", "submitted": True}
 
-@fakenodo_bp.route("/fakenodo/datasets", methods=["GET"])
-def list_datasets():
-    return jsonify(list(datasets.values()))
-
-
-# Delete a deposition
-
-
-@fakenodo_bp.route("/fakenodo/dataset/<int:dataset_id>", methods=["DELETE"])
-def delete_dataset(dataset_id):
-    dataset = datasets.pop(dataset_id, None)
-    if dataset:
-        os.remove(dataset["file_path"])
-        return jsonify({"message": "Dataset deleted"}), 200
-    return jsonify({"error": "Dataset not found"}), 404
+    # 202 (Accepted) es lo que devuelve Zenodo cuando la publicación es exitosa
+    return response_data, 202

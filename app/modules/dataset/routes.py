@@ -20,8 +20,8 @@ from app.modules.dataset.services import (
     DSMetaDataService,
     DSViewRecordService,
 )
-from app.modules.fakenodo.services import FakenodoService
 from app.modules.community.models import Community
+from app.modules.zenodo.services import ZenodoService
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 dataset_service = DataSetService()
 author_service = AuthorService()
 dsmetadata_service = DSMetaDataService()
-fakenodo_service = FakenodoService()
+zenodo_service = ZenodoService()
 doi_mapping_service = DOIMappingService()
 ds_view_record_service = DSViewRecordService()
 
@@ -59,7 +59,7 @@ def create_dataset():
         # send dataset as deposition to Zenodo
         data = {}
         try:
-            zenodo_response_json = fakenodo_service.create_new_deposition(dataset)
+            zenodo_response_json = zenodo_service.create_new_deposition(dataset)
             response_data = json.dumps(zenodo_response_json)
             data = json.loads(response_data)
         except Exception as exc:
@@ -76,13 +76,13 @@ def create_dataset():
             try:
                 # iterate for each feature model (one feature model = one request to Zenodo)
                 for feature_model in dataset.feature_models:
-                    fakenodo_service.upload_file(dataset, deposition_id, feature_model)
+                    zenodo_service.upload_file(dataset, deposition_id, feature_model)
 
                 # publish deposition
-                fakenodo_service.publish_deposition(deposition_id)
+                zenodo_service.publish_deposition(deposition_id)
 
                 # update DOI
-                deposition_doi = fakenodo_service.get_doi(deposition_id)
+                deposition_doi = zenodo_service.get_doi(deposition_id)
                 dataset_service.update_dsmetadata(dataset.ds_meta_data_id, dataset_doi=deposition_doi)
             except Exception as e:
                 msg = f"it has not been possible upload feature models in Zenodo and update the DOI: {e}"

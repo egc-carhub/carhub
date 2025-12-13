@@ -83,9 +83,6 @@ class DataSetService(BaseService):
     def latest_synchronized(self):
         return self.repository.latest_synchronized()
 
-    def latest_uploaded(self):
-        return self.repository.latest_uploaded()
-
     def count_synchronized_datasets(self):
         return self.repository.count_synchronized_datasets()
 

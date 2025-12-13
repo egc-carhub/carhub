@@ -29,7 +29,7 @@ def index():
 
     return render_template(
         "public/index.html",
-        datasets=dataset_service.latest_uploaded(),
+        datasets=dataset_service.latest_synchronized(),
         datasets_counter=datasets_counter,
         feature_models_counter=feature_models_counter,
         total_dataset_downloads=total_dataset_downloads,
