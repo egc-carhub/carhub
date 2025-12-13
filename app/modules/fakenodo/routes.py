@@ -1,7 +1,7 @@
 import logging
 import random
 
-from flask import Blueprint, jsonify, request  # , request
+from flask import Blueprint, jsonify
 
 fakenodo_bp = Blueprint("fakenodo_api", __name__)
 logger = logging.getLogger(__name__)
@@ -23,17 +23,16 @@ def create_deposition():
 
 
 @fakenodo_bp.route("/deposit/datasets/<int:dep_id>/files", methods=["POST"])
-def upload_file(dep_id):
+def upload_file(dep_id, data, files):
     """
     Simula la subida de un archivo.
     No guarda el archivo, solo comprueba que venga uno y devuelve éxito.
     """
-    files = request.files
     if "file" not in files:
         return jsonify({"error": "No se encontró ningún archivo"}), 400
 
     # Obtenemos el nombre del archivo solo para el log
-    filename = files["file"].filename
+    filename = files["file"].name
 
     # Devolvemos una respuesta de éxito genérica
     response_data = {"key": filename}

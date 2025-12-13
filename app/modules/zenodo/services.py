@@ -33,12 +33,8 @@ class ZenodoService(BaseService):
         self.params = {}
 
     def create_new_deposition(self, dataset: DataSet) -> dict:
-        # metadata = {
-        #     "title": dataset.ds_meta_data.title,
-        # }
-        # data = {"metadata": metadata}  # F841 - Esta variable no se usaba
+
         response_json, status_code = create_deposition()
-        # response = requests.post(self.ZENODO_API_URL, params=self.params, json=data, headers=self.headers)
         if status_code != 201:
             error_message = f"Failed to create deposition. Error details: {response_json}"
             raise Exception(error_message)
