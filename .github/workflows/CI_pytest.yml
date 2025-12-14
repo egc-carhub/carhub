@@ -25,6 +25,7 @@ jobs:
       MARIADB_HOSTNAME: 127.0.0.1
       MARIADB_PORT: 3306
       FLASK_ENV: testing
+      FAKENODO_URL: ${{ secrets.FAKENODO_URL }}
 
     services:
       # MariaDB service container for integration tests
@@ -35,7 +36,6 @@ jobs:
           MARIADB_DATABASE: ${{ env.MARIADB_DATABASE }}
           MARIADB_USER: ${{ env.MARIADB_USER }}
           MARIADB_PASSWORD: ${{ env.MARIADB_PASSWORD }}
-          FAKENODO_URL: ${{ env.FAKENODO_URL }}
 
         ports:
           - 3306:3306

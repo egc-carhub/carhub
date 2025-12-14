@@ -18,7 +18,6 @@ jobs:
           MYSQL_DATABASE: carhubdb_test
           MYSQL_USER: carhub_user
           MYSQL_PASSWORD: carhub_password
-          FAKENODO_URL: ${{ env.FAKENODO_URL }}
           
         ports:
           - 3306:3306
@@ -55,8 +54,10 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Trunk 1 to Render
+      - name: Trunk to Render
         env:
           deploy_url: ${{ secrets.RENDER_TRUNK_HOOK_URL }}
+          FAKENODO_URL: ${{ secrets.FAKENODO_URL }}
+
         run: |
           curl "$deploy_url"
