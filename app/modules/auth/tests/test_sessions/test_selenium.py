@@ -16,10 +16,9 @@ class TestSessions():
     close_driver(self.driver)
   
   def test_sessions(self):
-    host = get_host_for_selenium_testing()
     
     # Login flow
-    self.driver.get(f"{host}/")
+    self.driver.get(get_host_for_selenium_testing())
     self.driver.set_window_size(1070, 1063)
     self.driver.find_element(By.CSS_SELECTOR, ".navbar").click()
     self.driver.find_element(By.LINK_TEXT, "Login").click()
