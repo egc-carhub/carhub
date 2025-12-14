@@ -3,6 +3,8 @@ import pytest
 import time
 import json
 import os
+from core.selenium.common import close_driver, initialize_driver
+from core.environment.host import get_host_for_selenium_testing
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -14,14 +16,15 @@ from selenium.webdriver.support import expected_conditions as EC
 
 class TestSelenium():
   def setup_method(self, method):
-    self.driver = webdriver.Firefox()
+    self.driver = initialize_driver()
     self.vars = {}
   
   def teardown_method(self, method):
-    self.driver.quit()
+    self.close_driver(self.driver)
   
   def test_selenium(self):
-    self.driver.get("http://127.0.0.1:5000/")
+    host = get_host_for_selenium_testing()
+    self.driver.get(host)
     self.driver.set_window_size(1854, 1168)
     self.driver.find_element(By.CSS_SELECTOR, ".nav-link:nth-child(1)").click()
     self.driver.find_element(By.ID, "email").click()
