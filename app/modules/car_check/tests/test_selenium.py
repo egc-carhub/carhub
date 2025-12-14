@@ -4,6 +4,9 @@ from selenium.webdriver.common.by import By
 
 from core.environment.host import get_host_for_selenium_testing
 from core.selenium.common import close_driver, initialize_driver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 
 
 class TestCarcheck:
@@ -23,4 +26,7 @@ class TestCarcheck:
         self.driver.find_element(By.ID, "btnGroupDrop10").click()
         self.driver.find_element(By.LINK_TEXT, "Syntax check").click()
         self.driver.find_element(By.CSS_SELECTOR, ".list-group-item:nth-child(2) .col-12 > .btn").click()
-        self.driver.find_element(By.ID, "fileViewerModal").click()
+        WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located((By.ID, "fileViewerModal"))
+        )
+
