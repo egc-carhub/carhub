@@ -7,9 +7,9 @@
 name: Publish image in Docker Hub
 
 on:
-  release:
-    # Trigger only when a release is published
-    types: [published]
+  push:
+    tags:
+      - "v*" 
 
 jobs:
   push_to_registry:
