@@ -12,19 +12,17 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support import expected_conditions as EC
 from core.environment.host import get_host_for_selenium_testing
 from core.selenium.common import close_driver, initialize_driver
-from core.environment.host import get_host_for_selenium_testing
 
 class TestContador():
   def setup_method(self, method):
-    self.driver = webdriver.Firefox()
+    self.driver = initialize_driver()
     self.vars = {}
   
   def teardown_method(self, method):
-    self.driver.quit()
+    close_driver(self.driver)
   
   def test_contador(self):
-    host = get_host_for_selenium_testing()
-    self.driver.get(host)
+    self.driver.get(get_host_for_selenium_testing())
     self.driver.set_window_size(1854, 1048)
     self.driver.find_element(By.LINK_TEXT, "Login").click()
     self.driver.find_element(By.ID, "email").click()
