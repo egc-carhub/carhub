@@ -20,11 +20,11 @@ class TestSelenium():
     self.vars = {}
   
   def teardown_method(self, method):
-    self.close_driver(self.driver)
+    close_driver(self.driver)
   
   def test_selenium(self):
-    host = get_host_for_selenium_testing()
-    self.driver.get(host)
+  
+    self.driver.get(get_host_for_selenium_testing())
     self.driver.set_window_size(1854, 1168)
     self.driver.find_element(By.CSS_SELECTOR, ".nav-link:nth-child(1)").click()
     self.driver.find_element(By.ID, "email").click()
