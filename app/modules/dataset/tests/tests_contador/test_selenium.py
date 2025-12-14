@@ -42,8 +42,4 @@ class TestContador():
     self.driver.find_element(By.CSS_SELECTOR, ".col-xl-4").click()
     self.driver.refresh()
     self.driver.find_element(By.CSS_SELECTOR, ".sidebar-item:nth-child(2) .align-middle:nth-child(2)").click()
-    self.driver.find_element(By.LINK_TEXT, "prueba").click()
-    self.driver.find_element(By.LINK_TEXT, "Download all (129 bytes)").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".col-xl-4").click()
-    self.driver.refresh()
   

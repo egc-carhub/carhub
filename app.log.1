@@ -1,0 +1,118 @@
+2025-12-12 23:31:10,004 - app - ERROR - Error fetching active sessions: name 'User' is not defined
+Traceback (most recent call last):
+  File "/home/frasabgon/EGC/proyecto/carhub/app/modules/auth/routes.py", line 100, in list_sessions
+    user = User.query.get(int(user_id)) if user_id else current_user
+           ^^^^
+NameError: name 'User' is not defined
+2025-12-12 23:31:11,638 - app - ERROR - Error fetching active sessions: name 'User' is not defined
+Traceback (most recent call last):
+  File "/home/frasabgon/EGC/proyecto/carhub/app/modules/auth/routes.py", line 100, in list_sessions
+    user = User.query.get(int(user_id)) if user_id else current_user
+           ^^^^
+NameError: name 'User' is not defined
+2025-12-14 20:32:49,613 - app.modules.dataset.services - ERROR - Error assigning community: invalid literal for int() with base 10: ''
+Traceback (most recent call last):
+  File "/app/app/modules/dataset/services.py", line 123, in create_from_form
+    community = Community.query.get(int(community_id))
+                                    ^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: ''
+2025-12-14 23:00:55,005 - app - ERROR - Exception on /dataset/file/upload [POST]
+Traceback (most recent call last):
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask_restful/__init__.py", line 298, in error_router
+    return original_handler(e)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/app/modules/dataset/routes.py", line 123, in upload
+    os.makedirs(temp_folder)
+  File "<frozen os>", line 225, in makedirs
+PermissionError: [Errno 13] Permission denied: 'uploads/temp/6'
+2025-12-14 23:00:55,008 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-12-14 23:06:49,436 - app - ERROR - Exception on /dataset/file/upload [POST]
+Traceback (most recent call last):
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask_restful/__init__.py", line 298, in error_router
+    return original_handler(e)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/app/modules/dataset/routes.py", line 123, in upload
+    os.makedirs(temp_folder)
+  File "<frozen os>", line 225, in makedirs
+PermissionError: [Errno 13] Permission denied: 'uploads/temp/6'
+2025-12-14 23:06:49,436 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-12-14 23:11:57,855 - app - ERROR - Exception on /dataset/file/upload [POST]
+Traceback (most recent call last):
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask_restful/__init__.py", line 298, in error_router
+    return original_handler(e)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/app/modules/dataset/routes.py", line 123, in upload
+    os.makedirs(temp_folder)
+  File "<frozen os>", line 225, in makedirs
+PermissionError: [Errno 13] Permission denied: 'uploads/temp/6'
+2025-12-14 23:11:57,857 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-12-14 23:12:59,191 - app - ERROR - Exception on /dataset/file/upload [POST]
+Traceback (most recent call last):
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask_restful/__init__.py", line 298, in error_router
+    return original_handler(e)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frasabgon/EGC/proyecto/carhub/app/modules/dataset/routes.py", line 123, in upload
+    os.makedirs(temp_folder)
+  File "<frozen os>", line 225, in makedirs
+PermissionError: [Errno 13] Permission denied: 'uploads/temp/6'
+2025-12-14 23:12:59,192 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
