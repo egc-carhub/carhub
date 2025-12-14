@@ -18,7 +18,7 @@ jobs:
           MYSQL_DATABASE: carhubdb_test
           MYSQL_USER: carhub_user
           MYSQL_PASSWORD: carhub_password
-          FAKENODO_URL: ${{ secrets.FAKENODO_URL }}
+          FAKENODO_URL: ${{ env.FAKENODO_URL }}
           
         ports:
           - 3306:3306
