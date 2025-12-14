@@ -2,6 +2,8 @@
 from selenium.webdriver.common.by import By
 
 from core.selenium.common import initialize_driver
+from core.environment.host import get_host_for_selenium_testing
+from core.selenium.common import close_driver, initialize_driver
 
 class TestPruebaSelenium():
     def setup_method(self, method):
@@ -9,18 +11,14 @@ class TestPruebaSelenium():
         self.vars = {}
     
     def teardown_method(self, method):
-        self.driver.quit()
+        close_driver(self.driver)
     
     def test_pruebaSelenium(self):
-        self.driver.get("http://localhost:5000/")
+        self.driver.get(get_host_for_selenium_testing())
         self.driver.set_window_size(706, 923)
         self.driver.find_element(By.LINK_TEXT, "Login").click()
         self.driver.find_element(By.ID, "email").click()
-        self.driver.find_element(By.ID, "email").send_keys("user1@example.com")
-        self.driver.find_element(By.ID, "password").send_keys("1234+")
-        self.driver.find_element(By.ID, "submit").click()
-        self.driver.find_element(By.ID, "email").click()
-        self.driver.find_element(By.ID, "password").click()
+        self.driver.find_element(By.ID, "email").send_keys("user3@example.com")
         self.driver.find_element(By.ID, "password").send_keys("1234")
         self.driver.find_element(By.ID, "submit").click()
         self.driver.find_element(By.LINK_TEXT, "Sample dataset 4").click()
