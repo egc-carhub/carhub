@@ -168,9 +168,7 @@ def delete_other_sessions():
 
     # Marcar como inactivas todas las demás sesiones activas del usuario
     query = UserSession.query.filter(
-        UserSession.user_id == current_user.id,
-        UserSession.session_token != current_id,
-        UserSession.is_active
+        UserSession.user_id == current_user.id, UserSession.session_token != current_id, UserSession.is_active
     )
     closed_count = query.update({"is_active": False}, synchronize_session=False)
 
