@@ -10,7 +10,7 @@ class TwoFactorService:
     @staticmethod
     def generate_secret(seed=None):
         """Genera un secreto TOTP aleatorio para un usuario nuevo."""
-        rng = random.Random(seed)            # RNG controlado
+        rng = random.Random(seed)  # RNG controlado
         random_bytes = bytes(rng.getrandbits(8) for _ in range(20))  # tamaño típico para TOTP
         secret = base64.b32encode(random_bytes).decode().replace("=", "")
         return secret

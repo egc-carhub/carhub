@@ -2,10 +2,10 @@ from flask import jsonify
 from flask_login import current_user, login_required
 
 from app.extensions import db
-from app.modules.notifications import notifications_bp
-from app.modules.notifications.models import user_follows_user, user_follows_community, Notification
-from app.modules.notifications.services import NotificationService
 from app.modules.auth.models import User
+from app.modules.notifications import notifications_bp
+from app.modules.notifications.models import Notification, user_follows_community, user_follows_user
+from app.modules.notifications.services import NotificationService
 
 notification_service = NotificationService()
 
@@ -31,16 +31,13 @@ def follow_user(user_id):
         # unfollow
         db.session.execute(
             user_follows_user.delete().where(
-                (user_follows_user.c.follower_id == current_user.id)
-                & (user_follows_user.c.followed_id == user_id)
+                (user_follows_user.c.follower_id == current_user.id) & (user_follows_user.c.followed_id == user_id)
             )
         )
         db.session.commit()
         return jsonify({"message": "Unfollowed", "following": False})
     else:
-        db.session.execute(
-            user_follows_user.insert().values(follower_id=current_user.id, followed_id=user_id)
-        )
+        db.session.execute(user_follows_user.insert().values(follower_id=current_user.id, followed_id=user_id))
     db.session.commit()
     return jsonify({"message": "Followed", "following": True})
 
@@ -65,9 +62,7 @@ def follow_community(community_id):
         db.session.commit()
         return jsonify({"message": "Unfollowed community", "following": False})
     else:
-        db.session.execute(
-            user_follows_community.insert().values(user_id=current_user.id, community_id=community_id)
-        )
+        db.session.execute(user_follows_community.insert().values(user_id=current_user.id, community_id=community_id))
     db.session.commit()
     return jsonify({"message": "Followed community", "following": True})
 

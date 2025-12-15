@@ -1,6 +1,5 @@
 from app.extensions import db
 
-
 # Association table: users following other users
 user_follows_user = db.Table(
     "user_follows_user",

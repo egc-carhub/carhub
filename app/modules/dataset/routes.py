@@ -10,6 +10,7 @@ from zipfile import ZipFile
 from flask import abort, jsonify, make_response, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_required
 
+from app.modules.community.models import Community
 from app.modules.dataset import dataset_bp
 from app.modules.dataset.forms import DataSetForm
 from app.modules.dataset.services import (
@@ -20,7 +21,6 @@ from app.modules.dataset.services import (
     DSMetaDataService,
     DSViewRecordService,
 )
-from app.modules.community.models import Community
 from app.modules.zenodo.services import ZenodoService
 
 logger = logging.getLogger(__name__)

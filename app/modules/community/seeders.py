@@ -1,7 +1,6 @@
-from core.seeders.BaseSeeder import BaseSeeder
-
 from app.modules.auth.models import User
 from app.modules.community.models import Community
+from core.seeders.BaseSeeder import BaseSeeder
 
 
 class CommunitySeeder(BaseSeeder):
@@ -22,20 +21,20 @@ class CommunitySeeder(BaseSeeder):
                 name="Carreras",
                 description="Comunidad para coches de carreras",
                 created_at=self.db.func.now(),
-                community_members=[user1, user2, user3]
+                community_members=[user1, user2, user3],
             ),
             Community(
                 name="De mercado",
                 description="Comunidad para coches de mercado",
                 created_at=self.db.func.now(),
-                community_members=[user1, user3]
+                community_members=[user1, user3],
             ),
             Community(
                 name="Eléctricos",
                 description="Comunidad para coches eléctricos",
                 created_at=self.db.func.now(),
-                community_members=[user2]
-            )
+                community_members=[user2],
+            ),
         ]
 
         self.seed(data)

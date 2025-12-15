@@ -1,9 +1,10 @@
+import base64
+import os
+
 from app.modules.auth.models import User
 from app.modules.auth.services.two_factor_service import TwoFactorService  # ✅ añadido
 from app.modules.profile.models import UserProfile
 from core.seeders.BaseSeeder import BaseSeeder
-import os
-import base64
 
 
 class AuthSeeder(BaseSeeder):

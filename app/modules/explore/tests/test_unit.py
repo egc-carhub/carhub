@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from app.modules.explore.services import ExploreService
 
@@ -18,13 +19,7 @@ def test_filter_defaults():
 
         service.filter()
 
-        repo.filter.assert_called_once_with(
-            "",
-            "newest",
-            "any",
-            [],
-            "any"
-        )
+        repo.filter.assert_called_once_with("", "newest", "any", [], "any")
 
 
 def test_filter_with_parameters():
@@ -56,15 +51,7 @@ def test_filter_with_extra_kwargs():
 
         service.filter(query="test", page=3, limit=10)
 
-        repo.filter.assert_called_once_with(
-            "test",
-            "newest",
-            "any",
-            [],
-            "any",
-            page=3,
-            limit=10
-        )
+        repo.filter.assert_called_once_with("test", "newest", "any", [], "any", page=3, limit=10)
 
 
 @pytest.mark.parametrize("tags", [[], None])
@@ -75,13 +62,7 @@ def test_filter_tag_variants(tags):
 
         service.filter(tags=tags)
 
-        repo.filter.assert_called_once_with(
-            "",
-            "newest",
-            "any",
-            tags if tags is not None else None,
-            "any"
-        )
+        repo.filter.assert_called_once_with("", "newest", "any", tags if tags is not None else None, "any")
 
 
 def test_filter_returns_repository_value():

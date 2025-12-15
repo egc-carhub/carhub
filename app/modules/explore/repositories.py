@@ -1,12 +1,12 @@
 import re
 
 import unidecode
-from sqlalchemy import any_, or_, and_
+from sqlalchemy import and_, any_, or_
 
+from app.modules.community.models import Community
 from app.modules.dataset.models import Author, DataSet, DSMetaData, PublicationType
 from app.modules.featuremodel.models import FeatureModel, FMMetaData
 from core.repositories.BaseRepository import BaseRepository
-from app.modules.community.models import Community
 
 
 class ExploreRepository(BaseRepository):
@@ -41,7 +41,7 @@ class ExploreRepository(BaseRepository):
         # title, author name, tags). This helps when users paste a full
         # description or an author name like "Author 2" and expect a single
         # precise match.
-        if cleaned_query and ' ' in cleaned_query:
+        if cleaned_query and " " in cleaned_query:
             phrase_conditions = [
                 DSMetaData.description.ilike(f"%{cleaned_query}%"),
                 DSMetaData.title.ilike(f"%{cleaned_query}%"),
@@ -58,19 +58,21 @@ class ExploreRepository(BaseRepository):
 
         if words:
             for word in words:
-                per_word_conditions.append(or_(
-                    DSMetaData.title.ilike(f"%{word}%"),
-                    DSMetaData.description.ilike(f"%{word}%"),
-                    Author.name.ilike(f"%{word}%"),
-                    Author.affiliation.ilike(f"%{word}%"),
-                    Author.orcid.ilike(f"%{word}%"),
-                    FMMetaData.car_filename.ilike(f"%{word}%"),
-                    FMMetaData.title.ilike(f"%{word}%"),
-                    FMMetaData.description.ilike(f"%{word}%"),
-                    FMMetaData.publication_doi.ilike(f"%{word}%"),
-                    FMMetaData.tags.ilike(f"%{word}%"),
-                    DSMetaData.tags.ilike(f"%{word}%"),
-                ))
+                per_word_conditions.append(
+                    or_(
+                        DSMetaData.title.ilike(f"%{word}%"),
+                        DSMetaData.description.ilike(f"%{word}%"),
+                        Author.name.ilike(f"%{word}%"),
+                        Author.affiliation.ilike(f"%{word}%"),
+                        Author.orcid.ilike(f"%{word}%"),
+                        FMMetaData.car_filename.ilike(f"%{word}%"),
+                        FMMetaData.title.ilike(f"%{word}%"),
+                        FMMetaData.description.ilike(f"%{word}%"),
+                        FMMetaData.publication_doi.ilike(f"%{word}%"),
+                        FMMetaData.tags.ilike(f"%{word}%"),
+                        DSMetaData.tags.ilike(f"%{word}%"),
+                    )
+                )
 
             datasets = base_query.filter(and_(*per_word_conditions))
         else:

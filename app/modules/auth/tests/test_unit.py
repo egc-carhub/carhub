@@ -12,10 +12,10 @@ from app.modules.auth.services import AuthenticationService
 from app.modules.auth.services.two_factor_service import TwoFactorService
 from app.modules.profile.repositories import UserProfileRepository
 
-
 # =========================================================
 # Helpers
 # =========================================================
+
 
 def create_user_for_sessions(email="test_session@example.com", password="password123"):
     """
@@ -55,17 +55,13 @@ def login_user_helper(client, email, password):
 
 
 def get_latest_active_session(user_id: int):
-    return (
-        UserSession.query
-        .filter_by(user_id=user_id, is_active=True)
-        .order_by(UserSession.id.desc())
-        .first()
-    )
+    return UserSession.query.filter_by(user_id=user_id, is_active=True).order_by(UserSession.id.desc()).first()
 
 
 # =========================================================
 # Tests login / signup (los tuyos)
 # =========================================================
+
 
 def test_login_success(test_client):
     response = test_client.post(
@@ -121,6 +117,7 @@ def test_signup_user_successful(test_client):
 # Tests AuthenticationService (los tuyos)
 # =========================================================
 
+
 def test_service_create_with_profie_success(clean_database):
     data = {"name": "Test", "surname": "Foo", "email": "service_test@example.com", "password": "test1234"}
     AuthenticationService().create_with_profile(**data)
@@ -147,6 +144,7 @@ def test_service_create_with_profile_fail_no_password(clean_database):
 # =========================================================
 # Two Factor (los tuyos)
 # =========================================================
+
 
 def test_generate_secret_qr_and_verify():
     secret = TwoFactorService.generate_secret()
@@ -191,15 +189,13 @@ def test_enable_and_disable_2fa_on_user(test_app, clean_database):
 # User sessions
 # =========================================================
 
+
 def test_user_session_model(test_client, clean_database):
     with test_client.application.app_context():
         user = create_user_for_sessions()
 
         user_session = UserSession(
-            user_id=user.id,
-            session_token="unique-token-123",
-            ip_address="127.0.0.1",
-            user_agent="TestAgent"
+            user_id=user.id, session_token="unique-token-123", ip_address="127.0.0.1", user_agent="TestAgent"
         )
         db.session.add(user_session)
         db.session.commit()
@@ -240,6 +236,7 @@ def test_get_active_sessions(test_client, clean_database):
 
         assert len(active_sessions) == 1
         assert active_sessions[0].session_token == "token1"
+
 
 # =========================================================
 # User sessions (skipped tests)
@@ -296,7 +293,7 @@ def test_delete_other_sessions(test_client, clean_database):
     response = test_client.delete("/sessions")
     assert response.status_code == 200
     json_data = response.get_json()
-    assert json_data["closed"] == 2 # Should have closed the two test sessions
+    assert json_data["closed"] == 2  # Should have closed the two test sessions
     # Verify via DB
     with test_client.application.app_context():
         # Ensure instances are fresh
@@ -305,7 +302,7 @@ def test_delete_other_sessions(test_client, clean_database):
         assert UserSession.query.get(id2).is_active is False
     with test_client.session_transaction() as sess:
         assert "_user_id" in sess
-        
+
 
 @pytest.mark.skip(reason="Fails due to DetachedInstanceError and session persistence issues in test env")
 def test_list_sessions_route(test_client, clean_database):
@@ -344,6 +341,7 @@ def test_middleware_invalidates_session(test_client, clean_database):
     user = create_user_for_sessions(email, password)
     login_user_helper(test_client, email, password)
 
+
 # =========================================================
 # 4 tests extra (para volver a 22, unitarios y estables)
 # =========================================================
@@ -371,9 +369,7 @@ def test_temp_folder_by_user_returns_path(test_app, clean_database):
 
 
 def test_create_with_profile_links_profile(clean_database):
-    user = AuthenticationService().create_with_profile(
-        name="A", surname="B", email="link@example.com", password="1234"
-    )
+    user = AuthenticationService().create_with_profile(name="A", surname="B", email="link@example.com", password="1234")
 
     # perfil debe existir y estar vinculado
     assert user is not None

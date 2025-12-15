@@ -4,8 +4,8 @@ from datetime import datetime
 import pytest
 
 from app import db
-from app.modules.dataset.models import DataSet, DSMetaData, DSDownloadRecord, PublicationType
 from app.modules.auth.models import User
+from app.modules.dataset.models import DataSet, DSDownloadRecord, DSMetaData, PublicationType
 
 
 def create_user_if_missing():

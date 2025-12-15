@@ -7,14 +7,10 @@ from typing import Optional
 
 from flask import request
 
-from app.modules.auth.services import AuthenticationService
 from app.extensions import db
-from app.modules.notifications.models import (
-    user_follows_user,
-    user_follows_community,
-)
 from app.modules.auth.models import User
-from app.modules.notifications.services import NotificationService
+from app.modules.auth.services import AuthenticationService
+from app.modules.community.models import Community
 from app.modules.dataset.models import DataSet, DSMetaData, DSViewRecord
 from app.modules.dataset.repositories import (
     AuthorRepository,
@@ -30,9 +26,12 @@ from app.modules.hubfile.repositories import (
     HubfileRepository,
     HubfileViewRecordRepository,
 )
+from app.modules.notifications.models import (
+    user_follows_community,
+    user_follows_user,
+)
+from app.modules.notifications.services import NotificationService
 from core.services.BaseService import BaseService
-from app.modules.community.models import Community
-
 
 logger = logging.getLogger(__name__)
 
@@ -185,14 +184,12 @@ class DataSetService(BaseService):
 
                         # members of the community (join) — treat them as recipients as well
                         community_members = (
-                            list(community.community_members)
-                            if getattr(community, "community_members", None)
-                            else []
+                            list(community.community_members) if getattr(community, "community_members", None) else []
                         )
 
                         # Build unique recipient ids, exclude the actor (uploader)
                         recipient_ids = {u.id for u in community_followers} | {u.id for u in community_members}
-                        if current_user and getattr(current_user, 'id', None) in recipient_ids:
+                        if current_user and getattr(current_user, "id", None) in recipient_ids:
                             recipient_ids.discard(current_user.id)
 
                         logger.info(
@@ -240,7 +237,6 @@ class DataSetService(BaseService):
 
     def get_carhub_doi(self, dataset: DataSet) -> str:
         return f"{request.host_url.rstrip('/')}/doi/{dataset.ds_meta_data.dataset_doi}"
-
 
 
 class AuthorService(BaseService):

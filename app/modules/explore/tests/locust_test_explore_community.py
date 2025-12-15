@@ -25,9 +25,11 @@ Notes:
   API endpoints directly.
 
 """
-from locust import HttpUser, task, between
+
 import os
 from urllib.parse import urlencode
+
+from locust import HttpUser, between, task
 
 # Configurable values (can be overridden via environment variables)
 EXPLORE_PATH = os.environ.get("EXPLORE_PATH", "/explore")
@@ -39,6 +41,7 @@ SAMPLE_QUERY = os.environ.get("SAMPLE_QUERY", "machine learning")
 
 class ExploreUser(HttpUser):
     """Simulate a visitor exploring datasets and filtering by community."""
+
     wait_time = between(1, 3)
 
     @task(3)
@@ -110,5 +113,5 @@ class ExploreUser(HttpUser):
 
 # If you prefer a quick single-request smoke test, you can run:
 #   python3 -c "from locust_test_explore_community import ExploreUser; u=ExploreUser();"
-# But Locust should be run with: 
+# But Locust should be run with:
 #   locust -f app/modules/explore/tests/locust_test_explore_community.py --host=http://127.0.0.1:5000

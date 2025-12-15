@@ -1,4 +1,4 @@
-from flask import jsonify, redirect, render_template, request, session, url_for, current_app
+from flask import current_app, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from app.extensions import db
@@ -34,7 +34,7 @@ def show_signup_form():
         # Crear sesión para el nuevo usuario
         import uuid
         from datetime import datetime
-        
+
         session_token = str(uuid.uuid4())
         user_session = UserSession(
             user_id=user.id,

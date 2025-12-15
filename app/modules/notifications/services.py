@@ -1,11 +1,12 @@
 import logging
 import threading
+
 from flask import current_app, request
 from flask_mail import Message
 
 from app.extensions import db, mail
-from app.modules.notifications.models import Notification
 from app.modules.auth.models import User
+from app.modules.notifications.models import Notification
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ def _send_async_mail(app, msg):
             # from app.extensions if not present on the app.
             mail_obj = None
             try:
-                mail_obj = app.extensions.get('mail') if getattr(app, 'extensions', None) else None
+                mail_obj = app.extensions.get("mail") if getattr(app, "extensions", None) else None
             except Exception:
                 mail_obj = None
 
@@ -87,16 +88,16 @@ class NotificationService:
         if send_email:
             try:
                 recipient = User.query.get(recipient_id)
-                if recipient and getattr(recipient, 'email', None):
+                if recipient and getattr(recipient, "email", None):
                     subject = f"New notification from {actor_id if actor_id else 'System'}"
                     # build a simple body; include a link to the dataset if available
                     body = message
                     if dataset_id:
                         # include a full link to the dataset when possible
                         try:
-                            host_url = ''
-                            if request and getattr(request, 'host_url', None):
-                                host_url = request.host_url.rstrip('/')
+                            host_url = ""
+                            if request and getattr(request, "host_url", None):
+                                host_url = request.host_url.rstrip("/")
                             if host_url:
                                 body += f"\n\nView: {host_url}/dataset/{dataset_id}"
                             else:
@@ -123,7 +124,7 @@ class NotificationService:
                 # and to avoid thread timing issues.
                 if app.config.get("TESTING"):
                     try:
-                        mail_obj = app.extensions.get('mail') if getattr(app, 'extensions', None) else None
+                        mail_obj = app.extensions.get("mail") if getattr(app, "extensions", None) else None
                     except Exception:
                         mail_obj = None
                     if not mail_obj:

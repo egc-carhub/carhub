@@ -3,12 +3,13 @@ import io
 import pytest
 from flask import Flask
 from werkzeug.datastructures import FileStorage
-from app.modules.fakenodo.routes import fakenodo_bp, upload_file
 
+from app.modules.fakenodo.routes import fakenodo_bp, upload_file
 
 # ---------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------
+
 
 @pytest.fixture
 def app():
@@ -33,11 +34,9 @@ def client(app):
 # Tests
 # ---------------------------------------------------------------------
 
+
 def test_create_deposition(client):
-    response = client.post(
-        "/api/deposit/datasets",
-        json={"metadata": {"title": "Mi primer dataset"}}
-    )
+    response = client.post("/api/deposit/datasets", json={"metadata": {"title": "Mi primer dataset"}})
 
     assert response.status_code == 201
 
@@ -81,9 +80,7 @@ def test_upload_file_no_file_attached(app):
 def test_publish_deposition(client):
     dep_id = 654321
 
-    response = client.post(
-        f"/api/deposit/datasets/{dep_id}/actions/publish"
-    )
+    response = client.post(f"/api/deposit/datasets/{dep_id}/actions/publish")
 
     assert response.status_code == 202
 
@@ -104,10 +101,7 @@ def test_full_deposition_flow(app):
 
     # 1. Crear deposición - manteniendo el cliente para esta parte
     with app.test_client() as client:
-        create_resp = client.post(
-            "/api/deposit/datasets",
-            json={"metadata": {"title": "Dataset completo"}}
-        )
+        create_resp = client.post("/api/deposit/datasets", json={"metadata": {"title": "Dataset completo"}})
         assert create_resp.status_code == 201
         dep_id = create_resp.get_json()["id"]
 
@@ -116,10 +110,7 @@ def test_full_deposition_flow(app):
     fake_filename = "modelo_final.car"
 
     fake_file_storage = FileStorage(
-        stream=io.BytesIO(fake_file_content),
-        filename=fake_filename,
-        name="file",
-        content_type="text/plain"
+        stream=io.BytesIO(fake_file_content), filename=fake_filename, name="file", content_type="text/plain"
     )
 
     files_arg = {"file": fake_file_storage}
@@ -132,9 +123,7 @@ def test_full_deposition_flow(app):
 
     # 3. Publicar - usando el cliente HTTP
     with app.test_client() as client:
-        publish_resp = client.post(
-            f"/api/deposit/datasets/{dep_id}/actions/publish"
-        )
+        publish_resp = client.post(f"/api/deposit/datasets/{dep_id}/actions/publish")
         assert publish_resp.status_code == 202
 
         publish_data = publish_resp.get_json()
