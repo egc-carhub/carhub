@@ -45,6 +45,7 @@ jobs:
           MARIADB_TEST_DATABASE: carhubdb_test
           MARIADB_USER: carhub_user
           MARIADB_PASSWORD: carhub_password
+          FAKENODO_URL: ${{ secrets.FAKENODO_URL }}
         run: |
           pytest app/modules/ --ignore-glob='*selenium*'
 
