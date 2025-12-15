@@ -1,11 +1,5 @@
 import os
-from datetime import datetime
-from uuid import uuid4
-
-from flask import request, session
 from flask_login import current_user, login_user
-
-from app.extensions import db
 from app.modules.auth.models import User, UserSession
 from app.modules.auth.repositories import UserRepository
 from app.modules.profile.models import UserProfile
