@@ -54,94 +54,89 @@ def test_create_and_notify_sends_email(test_client):
         subjects = [s for s, r in dummy.sent]
         assert any("notification" in (s or "").lower() or "hello" in (s or "").lower() for s in subjects)
 
+    def test_follow_user_and_receive_notification(test_client):
+        with test_client.application.app_context():
+            # create an author user
+            author = User(email="author_user@example.com", password="pw")
+            db.session.add(author)
+            db.session.commit()
+            author_id = author.id
 
-def login(client, email="test@example.com", password="test1234"):
-    return client.post("/login", data=dict(email=email, password=password), follow_redirects=True)
+        # login as test user
+        rv = login(test_client)
+        assert rv.status_code == 200
 
+        # follow the author
+        r1 = test_client.post(f"/follow/user/{author_id}", headers={"Accept": "application/json"})
+        assert r1.status_code == 200
+        d1 = r1.get_json()
+        assert d1.get("following") is True
 
-def test_follow_user_and_receive_notification(test_client):
-    with test_client.application.app_context():
-        # create an author user
-        author = User(email="author_user@example.com", password="pw")
-        db.session.add(author)
-        db.session.commit()
-        author_id = author.id
+        # verify association row in DB exists
+        with test_client.application.app_context():
+            exists = (
+                db.session.query(user_follows_user)
+                .filter(user_follows_user.c.follower_id == User.query.filter_by(email="test@example.com").first().id)
+                .filter(user_follows_user.c.followed_id == author_id)
+                .first()
+            )
+            assert exists is not None
 
-    # login as test user
-    rv = login(test_client)
-    assert rv.status_code == 200
+        # Simulate author publishing: create notifications for followers
+        with test_client.application.app_context():
+            followers = (
+                db.session.query(User)
+                .join(user_follows_user, User.id == user_follows_user.c.follower_id)
+                .filter(user_follows_user.c.followed_id == author_id)
+                .all()
+            )
+            for follower in followers:
+                n = Notification(
+                    recipient_id=follower.id,
+                    actor_id=author_id,
+                    type="author_published_dataset",
+                    message="Author published dataset",
+                )
+                db.session.add(n)
+            db.session.commit()
 
-    # follow the author
-    r1 = test_client.post(f"/follow/user/{author_id}", headers={"Accept": "application/json"})
-    assert r1.status_code == 200
-    d1 = r1.get_json()
-    assert d1.get("following") is True
+        # fetch notifications for test user
+        rv = login(test_client)
+        list_resp = test_client.get("/notifications")
+        assert list_resp.status_code == 200
+        data = list_resp.get_json()
+        msgs = [n.get("message") for n in data]
+        assert "Author published dataset" in msgs
 
-    # verify association row in DB exists
-    with test_client.application.app_context():
-        exists = (
-            db.session.query(user_follows_user)
-            .filter(user_follows_user.c.follower_id == User.query.filter_by(email="test@example.com").first().id)
-            .filter(user_follows_user.c.followed_id == author_id)
-            .first()
-        )
-        assert exists is not None
+        # unfollow and ensure no notification on subsequent publish
+        r2 = test_client.post(f"/follow/user/{author_id}", headers={"Accept": "application/json"})
+        assert r2.status_code == 200
+        d2 = r2.get_json()
+        assert d2.get("following") is False
 
-    # Simulate author publishing: create notifications for followers
-    with test_client.application.app_context():
-        followers = (
-            db.session.query(User)
-            .join(user_follows_user, User.id == user_follows_user.c.follower_id)
-            .filter(user_follows_user.c.followed_id == author_id)
-            .all()
-        )
-        for follower in followers:
-            n = Notification(
-                recipient_id=follower.id,
+        # verify association row removed
+        with test_client.application.app_context():
+            exists = (
+                db.session.query(user_follows_user)
+                .filter(user_follows_user.c.follower_id == User.query.filter_by(email="test@example.com").first().id)
+                .filter(user_follows_user.c.followed_id == author_id)
+                .first()
+            )
+            assert exists is None
+
+        # simulate another publish
+        with test_client.application.app_context():
+            n2 = Notification(
+                recipient_id=author_id,
                 actor_id=author_id,
                 type="author_published_dataset",
-                message="Author published dataset",
+                message="Another publish",
             )
-            db.session.add(n)
-        db.session.commit()
+            db.session.add(n2)
+            db.session.commit()
 
-    # fetch notifications for test user
-    rv = login(test_client)
-    list_resp = test_client.get("/notifications")
-    assert list_resp.status_code == 200
-    data = list_resp.get_json()
-    msgs = [n.get("message") for n in data]
-    assert "Author published dataset" in msgs
-
-    # unfollow and ensure no notification on subsequent publish
-    r2 = test_client.post(f"/follow/user/{author_id}", headers={"Accept": "application/json"})
-    assert r2.status_code == 200
-    d2 = r2.get_json()
-    assert d2.get("following") is False
-
-    # verify association row removed
-    with test_client.application.app_context():
-        exists = (
-            db.session.query(user_follows_user)
-            .filter(user_follows_user.c.follower_id == User.query.filter_by(email="test@example.com").first().id)
-            .filter(user_follows_user.c.followed_id == author_id)
-            .first()
-        )
-        assert exists is None
-
-    # simulate another publish
-    with test_client.application.app_context():
-        n2 = Notification(
-            recipient_id=author_id,
-            actor_id=author_id,
-            type="author_published_dataset",
-            message="Another publish",
-        )
-        db.session.add(n2)
-        db.session.commit()
-
-    rv = login(test_client)
-    list_resp2 = test_client.get("/notifications")
-    data2 = list_resp2.get_json()
-    msgs2 = [n.get("message") for n in data2]
-    assert "Another publish" not in msgs2
+        rv = login(test_client)
+        list_resp2 = test_client.get("/notifications")
+        data2 = list_resp2.get_json()
+        msgs2 = [n.get("message") for n in data2]
+        assert "Another publish" not in msgs2

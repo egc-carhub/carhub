@@ -1,7 +1,5 @@
 import uuid
-from datetime import datetime
 
-import pytest
 
 from app import db
 from app.modules.auth.models import User
