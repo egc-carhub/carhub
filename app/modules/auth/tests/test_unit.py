@@ -6,7 +6,7 @@ import pytest
 from flask import url_for
 
 from app.extensions import db
-from app.modules.auth.models import User, UserSession
+from app.modules.auth.models import UserSession
 from app.modules.auth.repositories import UserRepository
 from app.modules.auth.services import AuthenticationService
 from app.modules.auth.services.two_factor_service import TwoFactorService
@@ -56,6 +56,18 @@ def login_user_helper(client, email, password):
 
 def get_latest_active_session(user_id: int):
     return UserSession.query.filter_by(user_id=user_id, is_active=True).order_by(UserSession.id.desc()).first()
+
+
+def session_test_helper(client, email="helper_session@example.com", password="password123"):
+    """Creates a user, logs them in, and creates a dummy session via test route."""
+    user = create_user_for_sessions(email, password)
+    login_user_helper(client, email, password)
+    # Create a dummy session via the test route
+    resp = client.get("/sessions/test")
+    # If route doesn't exist or fails (e.g. DetachedInstanceError), this might fail if test wasn't skipped
+    if resp.status_code == 200:
+        return user, resp.get_json().get("session_id")
+    return user, None
 
 
 # =========================================================
@@ -261,7 +273,7 @@ def test_delete_current_session_logs_out(test_client, clean_database):
     """Test closing the current session via API logs user out."""
     email = "delete_current@example.com"
     password = "pass"
-    user = create_user_for_sessions(email, password)
+    # user = create_user_for_sessions(email, password)
     login_user_helper(test_client, email, password)
     # Get current session ID from list
     response = test_client.get("/sessions")
@@ -321,7 +333,7 @@ def test_logout_invalidates_session(test_client, clean_database):
     """Test that logout invalidates the session in DB."""
     email = "logout_test@example.com"
     password = "pass"
-    user = create_user_for_sessions(email, password)
+    # user = create_user_for_sessions(email, password)
     login_user_helper(test_client, email, password)
     # Use internal session inspection to get the token or list sessions
     # But logout route relies on session cookie.
@@ -338,7 +350,7 @@ def test_middleware_invalidates_session(test_client, clean_database):
     """Test that middleware forces logout if session is inactive."""
     email = "middleware_test@example.com"
     password = "pass"
-    user = create_user_for_sessions(email, password)
+    # user = create_user_for_sessions(email, password)
     login_user_helper(test_client, email, password)
 
 
