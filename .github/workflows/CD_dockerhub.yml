@@ -8,6 +8,8 @@ name: Publish image in Docker Hub
 
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*" 
 
