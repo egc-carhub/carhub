@@ -32,7 +32,7 @@ jobs:
       # Step 3: Build and push the Docker image
       - name: Build and push Docker image
         run: |
-          TAG=${{ github.event.release.tag_name }}
+          TAG=${{ github.ref_name }}
           IMAGE=${{ secrets.DOCKER_USER }}/carhub
 
           docker build --build-arg VERSION_TAG=$TAG -t $IMAGE:$TAG -f docker/images/Dockerfile.prod .
