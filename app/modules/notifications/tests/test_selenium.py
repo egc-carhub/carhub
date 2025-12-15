@@ -2,9 +2,6 @@
 import pytest
 import time
 import json
-import os
-from core.selenium.common import close_driver, initialize_driver
-from core.environment.host import get_host_for_selenium_testing
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -12,7 +9,8 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.support import expected_conditions as EC 
+from core.environment.host import get_host_for_selenium_testing
+from core.selenium.common import close_driver, initialize_driver
 
 class TestSelenium():
   def setup_method(self, method):
@@ -23,7 +21,6 @@ class TestSelenium():
     close_driver(self.driver)
   
   def test_selenium(self):
-  
     self.driver.get(get_host_for_selenium_testing())
     self.driver.set_window_size(1854, 1168)
     self.driver.find_element(By.CSS_SELECTOR, ".nav-link:nth-child(1)").click()
@@ -31,143 +28,19 @@ class TestSelenium():
     self.driver.find_element(By.ID, "email").send_keys("user3@example.com")
     self.driver.find_element(By.ID, "password").send_keys("1234")
     self.driver.find_element(By.ID, "submit").click()
-    self.driver.find_element(By.LINK_TEXT, "Upload dataset").click()
-    self.driver.find_element(By.ID, "title").click()
-    self.driver.find_element(By.ID, "title").send_keys("usu")
-    self.driver.find_element(By.ID, "desc").click()
-    self.driver.find_element(By.ID, "desc").send_keys("usu")
-    file_path = os.path.abspath("app/modules/dataset/car_examples/file5.car")
-    dropzone = self.driver.find_element(By.CLASS_NAME, "dz-hidden-input")
-    dropzone.send_keys(file_path)
-    
-    WebDriverWait(self.driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#file-list li"))
-    )
-    
-   
-    agree_checkbox = self.driver.find_element(By.ID, "agreeCheckbox")
-    agree_checkbox.send_keys(Keys.SPACE)
-    
-    upload_button = self.driver.find_element(By.ID, "upload_button")
-    upload_button.click()
-    
-
-    WebDriverWait(self.driver, 10).until(
-        EC.url_contains("/dataset/")
-    )
-    
-    self.driver.find_element(By.LINK_TEXT, "Home").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".navbar").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".dropdown-item:nth-child(5)").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".nav-link:nth-child(1)").click()
-    self.driver.find_element(By.ID, "email").click()
-    self.driver.find_element(By.ID, "email").send_keys("user4@example.com")
-    self.driver.find_element(By.ID, "password").send_keys("1234")
-    self.driver.find_element(By.ID, "submit").click()
-    self.driver.find_element(By.LINK_TEXT, "usu").click()
-    self.driver.find_element(By.LINK_TEXT, "Smith, Alice").click()
+    self.driver.find_element(By.LINK_TEXT, "Sample dataset 4").click()
+    self.driver.find_element(By.LINK_TEXT, "Doe, Jane").click()
     self.driver.find_element(By.ID, "follow-btn").click()
-    self.driver.find_element(By.LINK_TEXT, "Sanchez, Renato").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".dropdown-item:nth-child(5)").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".nav-link:nth-child(1)").click()
-    self.driver.find_element(By.ID, "email").click()
-    self.driver.find_element(By.ID, "email").send_keys("user3@example.com")
-    self.driver.find_element(By.ID, "password").send_keys("1234")
-    self.driver.find_element(By.ID, "submit").click()
-    self.driver.find_element(By.LINK_TEXT, "Upload dataset").click()
-    self.driver.find_element(By.ID, "title").click()
-    self.driver.find_element(By.ID, "title").send_keys("userpruebva")
-    self.driver.find_element(By.CSS_SELECTOR, ".col-12:nth-child(2) > .mb-3").click()
-    self.driver.find_element(By.ID, "desc").click()
-    self.driver.find_element(By.ID, "desc").send_keys("yee")
-    
-
-    file_path = os.path.abspath("app/modules/dataset/car_examples/file5.car")
-    dropzone = self.driver.find_element(By.CLASS_NAME, "dz-hidden-input")
-    dropzone.send_keys(file_path)
-
-    WebDriverWait(self.driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#file-list li"))
-    )
-    
-
-    agree_checkbox = self.driver.find_element(By.ID, "agreeCheckbox")
-    agree_checkbox.send_keys(Keys.SPACE)
-    
-    upload_button = self.driver.find_element(By.ID, "upload_button")
-    upload_button.click()
-    
-
-    WebDriverWait(self.driver, 10).until(
-        EC.url_contains("/dataset/")
-    )
-    
-    self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".dropdown-item:nth-child(5)").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".nav-link:nth-child(1)").click()
-    self.driver.find_element(By.ID, "email").click()
-    self.driver.find_element(By.ID, "email").send_keys("user4@example.com")
-    self.driver.find_element(By.ID, "password").send_keys("1234")
-    self.driver.find_element(By.ID, "submit").click()
-    self.driver.find_element(By.LINK_TEXT, "Sanchez, Renato").click()
-    self.driver.find_element(By.ID, "notifications-toggle").click()
-    time.sleep(3)
+    self.driver.find_element(By.ID, "follow-btn").click()
+    self.driver.find_element(By.ID, "follow-btn").click()
     self.driver.find_element(By.CSS_SELECTOR, ".sidebar-item:nth-child(5) .align-middle:nth-child(2)").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".list-group-item:nth-child(3) > .mb-1:nth-child(2)").click()
+    self.driver.find_element(By.CSS_SELECTOR, ".list-group-item:nth-child(2) > .mb-1:nth-child(2)").click()
+    self.driver.find_element(By.ID, "membership-btn").click()
+    self.driver.find_element(By.ID, "membership-btn").click()
     self.driver.find_element(By.ID, "follow-community-btn").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".dropdown-item:nth-child(5)").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".nav-link:nth-child(1)").click()
-    self.driver.find_element(By.ID, "email").click()
-    self.driver.find_element(By.ID, "email").send_keys("user3@example.com")
-    self.driver.find_element(By.ID, "password").send_keys("1234")
-    self.driver.find_element(By.ID, "submit").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".sidebar-item:nth-child(5) .align-middle:nth-child(2)").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".list-group-item:nth-child(3) > .mb-1:nth-child(1)").click()
-    self.driver.find_element(By.ID, "membership-btn").click()
-    element = self.driver.find_element(By.ID, "membership-btn")
-    actions = ActionChains(self.driver)
-    actions.move_to_element(element).perform()
-    self.driver.find_element(By.CSS_SELECTOR, ".sidebar-item:nth-child(7) .align-middle:nth-child(2)").click()
-    self.driver.find_element(By.ID, "title").click()
-    self.driver.find_element(By.ID, "title").send_keys("electri")
-    self.driver.find_element(By.ID, "desc").click()
-    self.driver.find_element(By.ID, "desc").send_keys("electric")
-    
-    file_path = os.path.abspath("app/modules/dataset/car_examples/file5.car")
-    dropzone = self.driver.find_element(By.CLASS_NAME, "dz-hidden-input")
-    dropzone.send_keys(file_path)
-    
-    WebDriverWait(self.driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#file-list li"))
-    )
-    
-    agree_checkbox = self.driver.find_element(By.ID, "agreeCheckbox")
-    agree_checkbox.send_keys(Keys.SPACE)
-    
-    upload_button = self.driver.find_element(By.ID, "upload_button")
-    upload_button.click()
-    
-    WebDriverWait(self.driver, 10).until(
-        EC.url_contains("/dataset/")
-    )
-    
-    self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".dropdown-item:nth-child(5)").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".nav-link:nth-child(1)").click()
-    self.driver.find_element(By.ID, "email").click()
-    self.driver.find_element(By.ID, "email").send_keys("user4@example.com")
-    self.driver.find_element(By.ID, "password").send_keys("1234")
-    self.driver.find_element(By.ID, "submit").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
-    self.driver.find_element(By.ID, "notifications-toggle").click()
-    time.sleep(3)
-    self.driver.find_element(By.LINK_TEXT, "Communities").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".list-group-item:nth-child(3) > .mb-1:nth-child(2)").click()
     self.driver.find_element(By.ID, "follow-community-btn").click()
-    self.driver.find_element(By.ID, "membership-btn").click()
-    self.driver.find_element(By.ID, "membership-btn").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".text-dark").click()
+    self.driver.find_element(By.ID, "follow-community-btn").click()
+    self.driver.find_element(By.LINK_TEXT, "Back to Communities List").click()
+    self.driver.find_element(By.LINK_TEXT, "Smith, Alice").click()
     self.driver.find_element(By.CSS_SELECTOR, ".dropdown-item:nth-child(5)").click()
   
