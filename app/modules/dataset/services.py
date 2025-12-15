@@ -7,7 +7,10 @@ from typing import Optional
 
 from flask import request
 
+from app.extensions import db
+from app.modules.auth.models import User
 from app.modules.auth.services import AuthenticationService
+from app.modules.community.models import Community
 from app.modules.dataset.models import DataSet, DSMetaData, DSViewRecord
 from app.modules.dataset.repositories import (
     AuthorRepository,
@@ -23,6 +26,11 @@ from app.modules.hubfile.repositories import (
     HubfileRepository,
     HubfileViewRecordRepository,
 )
+from app.modules.notifications.models import (
+    user_follows_community,
+    user_follows_user,
+)
+from app.modules.notifications.services import NotificationService
 from core.services.BaseService import BaseService
 
 logger = logging.getLogger(__name__)
@@ -107,6 +115,18 @@ class DataSetService(BaseService):
 
             dataset = self.create(commit=False, user_id=current_user.id, ds_meta_data_id=dsmetadata.id)
 
+            try:
+                # Asumimos que form.community.data es una lista de IDs (strings)
+                community_ids = form.community.data
+                for community_id in community_ids:
+                    community = Community.query.get(int(community_id))
+                    if community:
+                        dataset.community_datasets.append(community)
+                    else:
+                        logger.warning(f"Community with id {community_id} not found.")
+            except Exception as e:
+                logger.exception(f"Error assigning community: {e}")
+
             for feature_model in form.feature_models:
                 car_filename = feature_model.car_filename.data
                 fmmetadata = self.fmmetadata_repository.create(commit=False, **feature_model.get_fmmetadata())
@@ -127,6 +147,85 @@ class DataSetService(BaseService):
                 )
                 fm.files.append(file)
             self.repository.session.commit()
+
+            # --- Notifications: notify users who follow this author (current_user) ---
+            try:
+                followers = (
+                    db.session.query(User)
+                    .join(user_follows_user, User.id == user_follows_user.c.follower_id)
+                    .filter(user_follows_user.c.followed_id == current_user.id)
+                    .all()
+                )
+
+                notification_svc = NotificationService()
+                logger.info(f"Notifying {len(followers)} followers of author {current_user.id}")
+                for follower in followers:
+                    try:
+                        notification_svc.create_and_notify(
+                            recipient_id=follower.id,
+                            actor_id=current_user.id,
+                            dataset_id=dataset.id,
+                            type="author_published_dataset",
+                            message=f"{current_user.email} published dataset '{dataset.ds_meta_data.title}'",
+                        )
+                    except Exception:
+                        logger.exception("Failed creating notification for follower")
+
+                # Notify users who follow each community associated with the dataset
+                for community in dataset.community_datasets:
+                    try:
+                        # followers via explicit follow action
+                        community_followers = (
+                            db.session.query(User)
+                            .join(user_follows_community, User.id == user_follows_community.c.user_id)
+                            .filter(user_follows_community.c.community_id == community.id)
+                            .all()
+                        )
+
+                        # members of the community (join) — treat them as recipients as well
+                        community_members = (
+                            list(community.community_members) if getattr(community, "community_members", None) else []
+                        )
+
+                        # Build unique recipient ids, exclude the actor (uploader)
+                        recipient_ids = {u.id for u in community_followers} | {u.id for u in community_members}
+                        if current_user and getattr(current_user, "id", None) in recipient_ids:
+                            recipient_ids.discard(current_user.id)
+
+                        logger.info(
+                            "Community %s: followers=%d members=%d unique_recipients=%d",
+                            community.id,
+                            len(community_followers),
+                            len(community_members),
+                            len(recipient_ids),
+                        )
+
+                        for rid in recipient_ids:
+                            try:
+                                notification_svc.create_and_notify(
+                                    recipient_id=rid,
+                                    actor_id=current_user.id,
+                                    community_id=community.id,
+                                    dataset_id=dataset.id,
+                                    type="community_dataset_added",
+                                    message=(
+                                        f"A new dataset '{dataset.ds_meta_data.title}' "
+                                        "was added to a community you follow"
+                                    ),
+                                )
+                            except Exception:
+                                logger.exception(
+                                    "Failed creating notification for community recipient %s in community %s",
+                                    rid,
+                                    community.id,
+                                )
+                    except Exception:
+                        logger.exception("Failed retrieving community followers/members for community %s", community.id)
+
+                db.session.commit()
+            except Exception as exc_notif:
+                logger.exception(f"Exception while creating notifications: {exc_notif}")
+                db.session.rollback()
         except Exception as exc:
             logger.info(f"Exception creating dataset from form...: {exc}")
             self.repository.session.rollback()
@@ -137,8 +236,7 @@ class DataSetService(BaseService):
         return self.dsmetadata_repository.update(id, **kwargs)
 
     def get_carhub_doi(self, dataset: DataSet) -> str:
-        domain = os.getenv("DOMAIN", "localhost")
-        return f"http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}"
+        return f"{request.host_url.rstrip('/')}/doi/{dataset.ds_meta_data.dataset_doi}"
 
 
 class AuthorService(BaseService):

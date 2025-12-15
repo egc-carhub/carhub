@@ -46,8 +46,8 @@ RUN pip install --no-cache-dir --upgrade pip
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
 
-# Expose port 80
-EXPOSE 80
+# Expose port 10000
+EXPOSE 10000
 
 # Command to run the application
 CMD ["./render_entrypoint.sh"]

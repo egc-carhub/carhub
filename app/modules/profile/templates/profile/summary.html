@@ -1,17 +1,51 @@
 {% extends "base_template.html" %}
 
-
 {% block title %}User Profile{% endblock %}
 
 {% block content %}
 
 <h1 class="h3 mb-3">User profile</h1>
 
+{% if current_user.is_authenticated and user.id != current_user.id %}
+    <div class="mb-3">
+    {% set _is_following = is_following if (is_following is defined) else False %}
+        <button id="follow-btn" class="btn {% if _is_following %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            {% if _is_following %}Unfollow{% else %}Follow{% endif %}
+        </button>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            const btn = document.getElementById('follow-btn');
+            btn.addEventListener('click', async function(){
+                btn.disabled = true;
+                try {
+                    const res = await fetch('/follow/user/{{ user.id }}', { method: 'POST', credentials: 'same-origin' });
+                    const data = await res.json();
+                    const following = typeof data.following === 'boolean' ? data.following : (data.message && !data.message.toLowerCase().includes('unfollow'));
+                    if (following) {
+                        btn.textContent = 'Unfollow';
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-primary');
+                    } else {
+                        btn.textContent = 'Follow';
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-outline-primary');
+                    }
+                } catch (e) {
+                    console.error(e);
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        });
+    </script>
+{% endif %}
+
 <div class="row">
 
+    <!-- Profile Information -->
     <div class="col-12 col-md-8 col-lg-6"> 
-
-        <div class="card shadow-sm" > 
+        <div class="card shadow-sm"> 
             <div class="card-header card-dark"> 
                 <h5 class="card-title mb-0" style="color: white; font-size: 15px;">Profile Information</h5>
             </div>
@@ -23,95 +57,177 @@
                 <p class="card-text h5"><i class="fa fa-envelope"></i> <strong>Email:</strong> {{user.email}}</p>
                 <p class="card-text h5"><i class="fa fa-database"></i> <strong>Uploaded datasets:</strong> {{ total_datasets }} datasets</p>
             </div>
-            
         </div>
-
     </div>
+
+    <!-- Active Sessions -->
+    {% if current_user.is_authenticated and user.id == current_user.id %}
+    <div class="col-12 col-md-8 col-lg-6 mt-4"> 
+        <div class="card shadow-sm">
+            <div class="card-header card-dark">
+                <h5 class="card-title mb-0" style="color: white; font-size: 15px;">Active Sessions</h5>
+            </div>
+            <div class="card-body">
+
+                <table class="table table-hover" id="sessions-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>IP</th>
+                            <th>Device</th>
+                            <th>Started</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+
+                <button id="close-all-sessions" class="btn btn-danger btn-sm mt-3">
+                    Close all other sessions
+                </button>
+
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
 </div>
 
 <h1 class="h3 mb-3">User datasets</h1>
 
-    {% if datasets %}
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Title</th>
-                                <th>Publication type</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                          
-                            {% for dataset in datasets %}
-                            <tr>
-                                <td>
+{% if datasets %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Publication type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-                                    {% if dataset.ds_meta_data.dataset_doi %}
-                                        <a href="{{ dataset.get_carhub_doi() }}">
-                                            {{ dataset.ds_meta_data.title }}
-                                        </a>
-                                    {% else %}
-                                        <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=dataset.id) }}">
-                                            {{ dataset.ds_meta_data.title }}
-                                        </a>                                    
-                                    {% endif %}
+                        {% for dataset in datasets %}
+                        <tr>
+                            <td>
 
-                                    
-                                </td>
-                                <td>{{ dataset.ds_meta_data.publication_type.name.replace('_', ' ').title() }}</td>
-                            </tr>
-                            {% else %}
-                          
-                            <tr>
-                                <td colspan="2">No datasets uploaded.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-   <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-center mt-4">
-                <nav>
-                    <ul class="pagination">
-                        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-                            <a class="page-link" href="{% if pagination.has_prev %}{{ url_for('profile.my_profile', page=pagination.prev_num) }}{% else %}# {% endif %}" aria-label="Previous">
-                                &laquo;
-                            </a>
-                        </li>
-                        {% for num in pagination.iter_pages() %}
-                        <li class="page-item {% if num == pagination.page %}active{% endif %}">
-                            <a class="page-link" href="{{ url_for('profile.my_profile', page=num) }}">
-                                {{ num }}
-                            </a>
-                        </li>
+                                {% if dataset.ds_meta_data.dataset_doi %}
+                                    <a href="{{ dataset.get_carhub_doi() }}">
+                                        {{ dataset.ds_meta_data.title }}
+                                    </a>
+                                {% else %}
+                                    <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=dataset.id) }}">
+                                        {{ dataset.ds_meta_data.title }}
+                                    </a>                                    
+                                {% endif %}
+
+                            </td>
+                            <td>{{ dataset.ds_meta_data.publication_type.name.replace('_', ' ').title() }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2">No datasets uploaded.</td>
+                        </tr>
                         {% endfor %}
-                        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-                            <a class="page-link" href="{% if pagination.has_next %}{{ url_for('profile.my_profile', page=pagination.next_num) }}{% else %}# {% endif %}" aria-label="Next">
-                                &raquo;
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-    {% else %}
-    <div class="alert alert-info" role="alert">
-        No datasets found
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-center mt-4">
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{% if pagination.has_prev %}{% if current_user.is_authenticated and user.id == current_user.id %}{{ url_for('profile.my_profile', page=pagination.prev_num) }}{% else %}{{ url_for('profile.user_profile', user_id=user.id, page=pagination.prev_num) }}{% endif %}{% else %}#{% endif %}" aria-label="Previous">
+                            &laquo;
+                        </a>
+                    </li>
+
+                    {% for num in pagination.iter_pages() %}
+                    <li class="page-item {% if num == pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{% if current_user.is_authenticated and user.id == current_user.id %}{{ url_for('profile.my_profile', page=num) }}{% else %}{{ url_for('profile.user_profile', user_id=user.id, page=num) }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endfor %}
+
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{% if pagination.has_next %}{% if current_user.is_authenticated and user.id == current_user.id %}{{ url_for('profile.my_profile', page=pagination.next_num) }}{% else %}{{ url_for('profile.user_profile', user_id=user.id, page=pagination.next_num) }}{% endif %}{% else %}#{% endif %}" aria-label="Next">
+                            &raquo;
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
-    {% endif %}
+</div>
+
+{% else %}
+<div class="alert alert-info" role="alert">
+    No datasets found
+</div>
+{% endif %}
 
 {% endblock %}
 
 {% block scripts %}
     <script src="{{ url_for('profile.scripts') }}"></script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        if (!document.getElementById("sessions-table")) {
+            return;
+        }
+
+        function loadSessions() {
+            fetch("/sessions")
+                .then(r => r.json())
+                .then(sessions => {
+                    let tbody = document.querySelector("#sessions-table tbody");
+                    tbody.innerHTML = "";
+
+                    sessions.forEach(s => {
+                        let tr = document.createElement("tr");
+
+                        tr.innerHTML = `
+                            <td>${s.ip}</td>
+                            <td>${s.user_agent.substring(0, 25)}...</td>
+                            <td>${new Date(s.created_at).toLocaleString()}</td>
+                            <td>
+                                ${s.is_current 
+                                    ? '<span class="badge bg-success">Current</span>'
+                                    : `<button class="btn btn-sm btn-outline-danger" onclick="deleteSession(${s.id})">Close</button>`}
+                            </td>
+                        `;
+
+                        tbody.appendChild(tr);
+                    });
+                });
+        }
+
+        window.deleteSession = function(id) {
+            fetch("/sessions/" + id, {
+                method: "DELETE"
+            }).then(() => loadSessions());
+        };
+
+        const closeAllBtn = document.getElementById("close-all-sessions");
+        if (closeAllBtn) {
+            closeAllBtn.addEventListener("click", function() {
+                fetch("/sessions", {
+                    method: "DELETE"
+                }).then(() => loadSessions());
+            });
+        }
+
+        loadSessions();
+    });
+    </script>
 {% endblock %}

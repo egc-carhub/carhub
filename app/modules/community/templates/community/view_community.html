@@ -1,0 +1,153 @@
+{% extends "base_template.html" %}
+
+{% block title %}My datasets{% endblock %}
+
+{% block content %}
+
+        <div class="container mt-5">
+        <h1>{{ community.name }}</h1>
+        <p><strong>Description:</strong> {{ community.description }}</p>
+        <p><strong>Created At:</strong> {{ community.created_at.strftime('%B %d, %Y') }}</p>
+        <div id="members-section">
+            <p><strong>Members:</strong></p>
+            {% if community.community_members %}
+                <ul id="members-list">
+                    {% for member in community.community_members %}
+                        <li data-user-id="{{ member.id }}">{{ member.email }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p id="members-empty">No members yet.</p>
+            {% endif %}
+        </div>
+        {% set is_member = current_user in community.community_members %}
+        <div class="mt-3">
+        <button id="membership-btn" class="btn {% if is_member %}btn-warning{% else %}btn-primary{% endif %}"
+            data-join-url="{{ join_url if join_url else ('/community/join/' ~ community.id) }}"
+            data-leave-url="{{ leave_url if leave_url else ('/community/leave/' ~ community.id) }}"
+            data-member="{{ '1' if is_member else '0' }}"
+            data-current-user-email="{{ current_user.email if current_user.is_authenticated else '' }}"
+            data-current-user-id="{{ current_user.id if current_user.is_authenticated else '' }}">
+                {% if is_member %}Leave Community{% else %}Join Community{% endif %}
+            </button>
+
+            <!-- follow button lives next to membership button -->
+        
+            {% set _is_following = is_following if (is_following is defined) else False %}
+            <button id="follow-community-btn" class="btn {% if _is_following %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                {% if _is_following %}Unfollow community{% else %}Follow community{% endif %}
+            </button>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function(){
+                const btn = document.getElementById('follow-community-btn');
+                btn.addEventListener('click', async function(){
+                    btn.disabled = true;
+                    try {
+                        const res = await fetch('/follow/community/{{ community.id }}', { method: 'POST', credentials: 'same-origin' });
+                        const data = await res.json();
+                        const following = typeof data.following === 'boolean' ? data.following : (data.message && !data.message.toLowerCase().includes('unfollow'));
+                        if (following) {
+                            btn.textContent = 'Unfollow community';
+                            btn.classList.remove('btn-outline-secondary');
+                            btn.classList.add('btn-secondary');
+                        } else {
+                            btn.textContent = 'Follow community';
+                            btn.classList.remove('btn-secondary');
+                            btn.classList.add('btn-outline-secondary');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    } finally {
+                        btn.disabled = false;
+                    }
+                });
+            });
+        </script>
+        <script>
+            // Membership toggle button (behaves like follow button)
+            document.addEventListener('DOMContentLoaded', function(){
+                const mb = document.getElementById('membership-btn');
+                if (!mb) return;
+                mb.addEventListener('click', async function(){
+                    mb.disabled = true;
+                    try {
+                        const isMember = mb.getAttribute('data-member') === '1';
+                        const url = isMember ? mb.getAttribute('data-leave-url') : mb.getAttribute('data-join-url');
+                        console.log('membership toggle ->', url, 'was member?', isMember);
+                        const res = await fetch(url, { method: 'POST', credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                        console.log('membership response', res.status, 'redirected', res.redirected);
+                        if (res.redirected) {
+                            alert('Sesión expirada. Serás redirigido al login.');
+                            window.location.href = res.url;
+                            return;
+                        }
+                        if (!res.ok) {
+                            console.error('membership toggle failed', res.status);
+                            window.location.reload();
+                            return;
+                        }
+                        const data = await res.json();
+                        console.log('membership json', data);
+                        const memberNow = !!data.member;
+                        mb.setAttribute('data-member', memberNow ? '1' : '0');
+                        const userEmail = mb.getAttribute('data-current-user-email');
+                        const userId = mb.getAttribute('data-current-user-id');
+
+                        // Update members list in DOM
+                        const membersList = document.getElementById('members-list');
+                        const membersEmpty = document.getElementById('members-empty');
+                        if (memberNow) {
+                            // add current user to list if not present
+                            if (membersEmpty) {
+                                // replace empty paragraph with a list
+                                const ul = document.createElement('ul');
+                                ul.id = 'members-list';
+                                const li = document.createElement('li');
+                                if (userId) li.setAttribute('data-user-id', userId);
+                                li.textContent = userEmail;
+                                ul.appendChild(li);
+                                membersEmpty.parentNode.replaceChild(ul, membersEmpty);
+                            } else if (membersList) {
+                                // ensure no duplicate
+                                const exists = membersList.querySelector(`li[data-user-id="${userId}"]`) || Array.from(membersList.querySelectorAll('li')).some(li => li.textContent === userEmail);
+                                if (!exists) {
+                                    const li = document.createElement('li');
+                                    if (userId) li.setAttribute('data-user-id', userId);
+                                    li.textContent = userEmail;
+                                    membersList.appendChild(li);
+                                }
+                            }
+                            mb.textContent = 'Leave Community';
+                            mb.classList.remove('btn-primary');
+                            mb.classList.add('btn-warning');
+                        } else {
+                            // remove user from list
+                            if (membersList) {
+                                const toRemove = membersList.querySelector(`li[data-user-id="${userId}"]`) || Array.from(membersList.querySelectorAll('li')).find(li => li.textContent === userEmail);
+                                if (toRemove) {
+                                    toRemove.parentNode.removeChild(toRemove);
+                                }
+                                // if list empty now, replace with 'No members yet.'
+                                if (membersList.children.length === 0) {
+                                    const p = document.createElement('p');
+                                    p.id = 'members-empty';
+                                    p.textContent = 'No members yet.';
+                                    membersList.parentNode.replaceChild(p, membersList);
+                                }
+                            }
+                            mb.textContent = 'Join Community';
+                            mb.classList.remove('btn-warning');
+                            mb.classList.add('btn-primary');
+                        }
+                    } catch (e) {
+                        console.error('Error toggling membership', e);
+                    } finally {
+                        mb.disabled = false;
+                    }
+                });
+            });
+        </script>
+        <a href="{{ url_for('community.list_communities') }}" class="btn btn-primary mt-3">Back to Communities List</a>
+    </div>
+{% endblock %}

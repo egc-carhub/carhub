@@ -64,6 +64,13 @@ class DSMetaData(db.Model):
     authors = db.relationship("Author", backref="ds_meta_data", lazy=True, cascade="all, delete")
 
 
+community_datasets = db.Table(
+    "community_datasets",
+    db.Column("dataset_id", db.Integer, db.ForeignKey("data_set.id"), primary_key=True),
+    db.Column("community_id", db.Integer, db.ForeignKey("community.id"), primary_key=True),
+)
+
+
 class DataSet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
@@ -73,6 +80,8 @@ class DataSet(db.Model):
 
     ds_meta_data = db.relationship("DSMetaData", backref=db.backref("data_set", uselist=False))
     feature_models = db.relationship("FeatureModel", backref="data_set", lazy=True, cascade="all, delete")
+
+    community_datasets = db.relationship("Community", secondary=community_datasets, back_populates="datasets")
 
     def name(self):
         return self.ds_meta_data.title
@@ -101,6 +110,16 @@ class DataSet(db.Model):
 
         return SizeService().get_human_readable_size(self.get_file_total_size())
 
+    def get_downloads_count(self):
+        # return the number of download records for this dataset
+        from app.modules.dataset.models import DSDownloadRecord
+
+        try:
+            return DSDownloadRecord.query.filter_by(dataset_id=self.id).count()
+        except Exception:
+            # If DB isn't available for some reason, fall back to 0
+            return 0
+
     def get_carhub_doi(self):
         from app.modules.dataset.services import DataSetService
 
@@ -117,6 +136,7 @@ class DataSet(db.Model):
             "publication_type": self.get_cleaned_publication_type(),
             "publication_doi": self.ds_meta_data.publication_doi,
             "dataset_doi": self.ds_meta_data.dataset_doi,
+            "communities": [{"id": c.id, "name": c.name} for c in self.community_datasets],
             "tags": self.ds_meta_data.tags.split(",") if self.ds_meta_data.tags else [],
             "url": self.get_carhub_doi(),
             "download": f'{request.host_url.rstrip("/")}/dataset/download/{self.id}',

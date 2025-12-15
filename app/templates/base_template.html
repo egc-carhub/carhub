@@ -41,7 +41,7 @@ chico sundermann">
     <nav id="sidebar" class="sidebar js-sidebar">
         <div class="sidebar-content js-simplebar">
             <a class="sidebar-brand" href="{{ url_for('public.index') }}">
-                <img src="{{ url_for("static", filename="img/logos/logo-dark.svg") }}" class="d-block"
+                <img src="{{ url_for("static", filename="img/logos/logo-light.jpeg") }}" class="d-block"
                      style="max-width: 100%; height: auto;">
             </a>
 
@@ -68,6 +68,12 @@ chico sundermann">
                     <a class="sidebar-link" href="{{ url_for('team.index') }}">
                         <i class="align-middle" data-feather="users"></i> <span
                             class="align-middle">Team</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item {{ 'active' if request.endpoint == 'community.list_communities' else '' }}">
+                    <a class="sidebar-link" href="{{ url_for('community.list_communities') }}">
+                        <i class="align-middle" data-feather="layers"></i> <span class="align-middle">Communities</span>
                     </a>
                 </li>
 
@@ -177,7 +183,15 @@ chico sundermann">
                         <a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
                             <span class="text-dark">{{ current_user.profile.surname }}, {{ current_user.profile.name }}</span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end">
+                        <div class="dropdown-menu dropdown-menu-end" data-bs-auto-close="outside">
+                            <a class="dropdown-item" href="#" id="notifications-toggle">
+                                <i class="align-middle me-1" data-feather="bell"></i>
+                                Notifications <span id="notif-count" class="badge bg-danger ms-2" style="display:none">0</span>
+                            </a>
+                            <div id="notif-dropdown" class="p-2" style="min-width: 280px; max-height: 300px; overflow:auto; display:none">
+                                <div id="notif-list">Loading...</div>
+                            </div>
+                            <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{ url_for('profile.my_profile') }}">
                                 <i class="align-middle me-1" data-feather="user"></i> My profile</a>
                             <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
@@ -299,6 +313,64 @@ Romero-Organvidez, D., Galindo, J. A., Sundermann, C., Horcas, J.-M., & Benavide
         navigator.clipboard.writeText(textToCopy);
     }
 
+</script>
+
+<script>
+    // Notifications dropdown behavior
+    document.addEventListener("DOMContentLoaded", function() {
+        const toggle = document.getElementById('notifications-toggle');
+        const list = document.getElementById('notif-list');
+        const container = document.getElementById('notif-dropdown');
+        const countEl = document.getElementById('notif-count');
+
+        async function loadNotifs() {
+            try {
+                const res = await fetch('/notifications');
+                if (!res.ok) return;
+                const data = await res.json();
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<div class="small text-muted">No notifications</div>';
+                    countEl.style.display = 'none';
+                    return;
+                }
+                list.innerHTML = '';
+                let unread = 0;
+                data.slice(0, 20).forEach(n => {
+                    if (!n.read) unread += 1;
+                    const item = document.createElement('div');
+                    item.className = 'dropdown-item';
+                    item.innerHTML = `<div><small class="text-muted">${new Date(n.created_at).toLocaleString()}</small></div><div>${n.message}</div>`;
+                    list.appendChild(item);
+                });
+                if (unread > 0) {
+                    countEl.textContent = unread;
+                    countEl.style.display = 'inline-block';
+                } else {
+                    countEl.style.display = 'none';
+                }
+            } catch (e) {
+                console.error('Failed loading notifications', e);
+            }
+        }
+
+        if (toggle) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                // prevent Bootstrap dropdown from auto-closing this menu when clicking the notifications item
+                e.stopPropagation();
+                if (container.style.display === 'none' || container.style.display === '') {
+                    loadNotifs();
+                    container.style.display = 'block';
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+            // Also prevent clicks inside the notifications container from closing the dropdown
+            if (container) {
+                container.addEventListener('click', function(ev){ ev.stopPropagation(); });
+            }
+        }
+    });
 </script>
 
 {% block scripts %}{% endblock %}

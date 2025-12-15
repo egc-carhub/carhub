@@ -77,6 +77,17 @@
                         <div class="row mb-2">
 
                             <div class="col-12">
+                                <th>Communities:</th>
+                                {% for community in dataset.community_datasets %}
+                                    <a href="/community/{{ community.id }}" class="badge bg-secondary">{{ community.name }}</a>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+
+                        <div class="row mb-2">
+
+                            <div class="col-12">
                                 {% for tag in dataset.ds_meta_data.tags.split(',') %}
                                     <span class="badge bg-secondary">{{ tag.strip() }}</span>
                                 {% endfor %}

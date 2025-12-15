@@ -3,8 +3,6 @@ name: Codacy CI
 on:
   push:
     branches: [trunk]
-  pull_request:
-    branches: [main]
 
 jobs:
   build:
@@ -63,3 +61,4 @@ jobs:
           MARIADB_USER: carhub_user
           MARIADB_PASSWORD: carhub_password
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          FAKENODO_URL: ${{ secrets.FAKENODO_URL }}

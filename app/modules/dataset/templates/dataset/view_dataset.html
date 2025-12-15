@@ -64,7 +64,7 @@
                         </span>
                     </div>
                     <div class="col-md-8 col-12">
-                        <a href="#">{{ dataset.user.profile.surname }}, {{ dataset.user.profile.name }}</a>
+                        <a href="{{ url_for('profile.user_profile', user_id=dataset.user.id) }}">{{ dataset.user.profile.surname }}, {{ dataset.user.profile.name }}</a>
                     </div>
 
                 </div>
@@ -138,6 +138,43 @@
                         {% endif %}
 
                 </div>
+                {% endif %}
+
+                <div class="row mb-2">
+
+                    <div class="col-md-4 col-12">
+                        <span class=" text-secondary">
+                            Communities:
+                        </span>
+                    </div>
+                    <div class="col-md-8 col-12">
+                        {% for community in dataset.community_datasets %}
+                            <a href="/community/{{ community.id }}" class="badge bg-secondary">{{ community.name }}</a>
+                        {% endfor %}
+                    </div>
+
+                </div>
+                
+                {% if dataset.ds_meta_data.dataset_doi or dataset.draft_mode %}
+
+                    {% else %}
+
+                    <div class="row mb-2">
+                        <div class="col-md-4 col-12">
+                            <span class="text-secondary">
+                                Publicar
+                            </span>
+                        </div>
+                        <div class="col-md-8 col-12">
+                            <form action="{{ url_for('zenodo.publish_dataset', dataset_id=dataset.id) }}" method="POST">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i data-feather="upload-cloud"></i>
+                                    Publish to FakeNodo
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
                 {% endif %}
                 <div class="row mb-2">
 
@@ -239,6 +276,16 @@
                     <div class="col-12 d-flex justify-content-between align-items-center">
                         <h4 style="margin-bottom: 0px">CAR models</h4>
                         <h4 style="margin-bottom: 0px;"><span class="badge bg-dark">{{ dataset.get_files_count() }}</span></h4>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12 d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-secondary">Downloads</small>
+                        </div>
+                        <div>
+                            <h5 style="margin-bottom: 0px;"><span class="badge bg-info">{{ dataset.get_downloads_count() }}</span></h5>
+                        </div>
                     </div>
                 </div>
                 

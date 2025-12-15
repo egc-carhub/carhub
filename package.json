@@ -1,0 +1,26 @@
+{
+  "name": "carhub",
+  "version": "1.0.0",
+  "description": "<div style=\"text-align: center;\">   <img src=\"https://www.uvlhub.io/static/img/logos/logo-dark.svg\" alt=\"Logo\"> </div>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/egc-carhub/carhub.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/egc-carhub/carhub/issues"
+  },
+  "homepage": "https://github.com/egc-carhub/carhub#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "husky": "^9.1.7"
+  }
+}
