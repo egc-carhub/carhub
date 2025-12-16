@@ -21,6 +21,7 @@ function send_query() {
                 query: document.querySelector('#query').value,
                 publication_type: document.querySelector('#publication_type').value,
                 sorting: document.querySelector('[name="sorting"]:checked').value,
+                downloads_sorting: document.querySelector('[name="downloads_sorting"]:checked').value,
                 community: document.querySelector('#community_filter').value,
             };
 
