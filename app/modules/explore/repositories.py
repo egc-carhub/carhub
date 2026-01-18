@@ -129,3 +129,4 @@ class ExploreRepository(BaseRepository):
         except Exception:
             # Fall back to returning an empty list in case of unexpected DB errors
             return []
+        #sd
